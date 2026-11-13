@@ -9,6 +9,7 @@ The rules that each project of the fleet follows. The owner approved them on 202
 | `HUMAN.md` | When an agent asks a person, how it asks, and the budget of the owner's attention |
 | `DESIGN.md` | How an agent judges a look with no person |
 | `RESOURCES.md` | What the agents can use, and how they ask for more |
+| `FEEDBACK.md` | How a person gives feedback in a product, and what the system does with it |
 
 ## Status
 

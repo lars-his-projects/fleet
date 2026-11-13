@@ -25,7 +25,7 @@ Put scratch output in the scratchpad, in `out/` or in `_site/`. Never commit a b
 - `dashboard/` – the fleet page. `sources.py` does the reads (git for the `metrics` branch, the GitHub API for the
   roadmap and the issues). `model.py` computes each number with pure functions. `page.py` makes the HTML.
   `build.py` is the command.
-- `standards/` – the rules of all projects: `PRINCIPLES.md` (S1 to S10), `HUMAN.md`, `DESIGN.md`, `RESOURCES.md`.
+- `standards/` – the rules of all projects: `PRINCIPLES.md` (S1 to S10), `HUMAN.md`, `DESIGN.md`, `RESOURCES.md`, `FEEDBACK.md`.
 - `steering/project/` – the roadmap, the decisions and the principles of the hub.
 - `.github/workflows/` – `ci.yml` (the job `quick`), `fleet-page.yml` (builds and publishes the page), `labels.yml`.
   `.github/ISSUE_TEMPLATE/new-project.yml` is the form "New project". `.github/labels.txt` defines the labels.
