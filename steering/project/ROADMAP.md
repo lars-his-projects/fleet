@@ -84,6 +84,11 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - A workflow makes the repository from the template, adds it to `fleet.toml`, and sets the labels, the rules and Pages
   - A run writes the roadmap; the owner gets one card: approve or change the roadmap
   - The skill `/new-project` fills the same form with a dialogue
+  - No scheduled task and no secret for each project (decision of 2026-11-13, card 6, option A): one set of tasks
+    with no repository and one set of organization secrets serve the whole fleet; the pacer sends the repository
+    in the start text, and the run attaches it
+  - A test first: a run with no repository attaches the repository of its start text and does a ticket
+  - Before this goes live: the agent login cannot read `server-config`
 - [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
 - [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
 - [ ] `human:budget` The attention budget: minutes on each card; the inbox sorts by value for each minute
