@@ -29,3 +29,4 @@ the owner chose another option, `agent`: an agent decided and logged it, `-`: no
 - 2026-11-13 · session · A card names its person with the GitHub assignee, not with a label `for-<name>`: GitHub shows each person one list of all cards · taken (owner) · S2
 - 2026-11-13 · card 6 · The test of option A failed: a run with no repository has no tool to attach one. A session can start a run directly in a repository. The changed proposal "A2" (one starter session for the fleet) waits for the owner · open · S8
 - 2026-11-13 · card 6 · The runs of a new project: A2, one starter session for the fleet starts the runs from the plans of the pacer workflows (C: a step card for each project) · A2 (owner) · S8
+- 2026-11-13 · card 7 · New project street-quiz: the owner is Larspolo only (Jeroen is a collaborator, not an owner); the name stays; the app is fun and for everyone; the first selection is the name of an area, the shape drawing and the levels come later · taken (owner) · S8

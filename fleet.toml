@@ -44,3 +44,9 @@ repo = "lars-his-projects/fleet"
 what = "The hub: the project list, the standards, the fleet page and the agent system of all projects."
 stage = "build"
 owners = ["Larspolo"]
+
+[projects.street-quiz]
+repo = "lars-his-projects/street-quiz"
+what = "A quiz on a real map to learn the street names of an area."
+stage = "build"
+owners = ["Larspolo"]
