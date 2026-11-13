@@ -24,3 +24,4 @@ the owner chose another option, `agent`: an agent decided and logged it, `-`: no
 - 2026-11-13 · session · The hub is public, and the fleet page is at https://lars-his-projects.github.io/fleet/ · taken · S4
 - 2026-11-13 · session · "move": each project uses its new name in the organization (one PR per project) · taken · S5
 - 2026-11-13 · session · "guard": a weekly pace from the start of the week in each project (`week_guard = true`, `week_free = 0`), until the one pacer exists · taken · S4
+- 2026-11-13 · session · "share": each project plans with its part of the weekly budget (`week_share`, its weight in `fleet.toml`) and the runs leave the reserve of D3 (`week_reserve`) to the owner until 12 hours before the reset; before, each of four pacers planned with the whole budget of the account · taken · S4
