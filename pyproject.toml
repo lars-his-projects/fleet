@@ -5,9 +5,12 @@ line-length = 150
 select = ["F", "I"]   # pyflakes: undefined names, unused variables and imports; isort: sorted imports
 
 [tool.ruff.lint.isort]
-known-first-party = ["hub", "dashboard"]
+known-first-party = ["hub", "fleetpage"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "framework/tests"]
 pythonpath = ["."]
 addopts = "-q"
+
+[tool.ruff.lint.per-file-ignores]
+"framework/**" = ["I"]   # the generic files are linted in their source project; rule F stays on

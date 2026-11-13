@@ -1,8 +1,8 @@
 """Build the fleet page: read each project of `fleet.toml`, write `index.html` and `data.json`.
 
-    python3 -m dashboard.build --out _site
-    python3 -m dashboard.build --out _site --metrics-dir aoe2mc=/path/to/a/checkout/of/its/metrics/branch
-    python3 -m dashboard.build --out _site --offline        # no network: only the folders of --metrics-dir
+    python3 -m fleetpage.build --out _site
+    python3 -m fleetpage.build --out _site --metrics-dir aoe2mc=/path/to/a/checkout/of/its/metrics/branch
+    python3 -m fleetpage.build --out _site --offline        # no network: only the folders of --metrics-dir
 
 The workflow `fleet-page.yml` runs the first form. A read that fails does not stop the build: the page names the
 project and the fault, and shows the other projects. The exit code is 1 only when `fleet.toml` has a fault.
@@ -15,7 +15,7 @@ import pathlib
 import sys
 import tempfile
 
-from dashboard import model, page, sources
+from fleetpage import model, page, sources
 from hub import registry
 
 

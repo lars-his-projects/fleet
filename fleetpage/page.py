@@ -6,7 +6,7 @@ import datetime
 import html
 import json
 
-from dashboard.model import LIMIT, ts
+from fleetpage.model import LIMIT, ts
 
 E = html.escape
 HUES = 8                        # the project colors --p0 ... --p7; a later project gets the neutral color

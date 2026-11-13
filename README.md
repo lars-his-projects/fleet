@@ -10,7 +10,7 @@ projects share, and the overview.
 |---|---|
 | `fleet.toml` | The registry: each project with its stage, its weight (its share of the quota), its owners and its addresses |
 | `standards/` | The rules for all projects: the principles (S1 to S10), when an agent asks a person, design, resources |
-| `dashboard/` | The fleet page: one dashboard for all projects, built by a workflow with no Claude quota |
+| `fleetpage/` | The fleet page: one dashboard for all projects, built by a workflow with no Claude quota |
 | `steering/project/ROADMAP.md` | The plan of the hub: what works (`[x]`) and what comes next |
 | `steering/project/DECISIONS.md` | The log of the owner's decisions about the fleet |
 | The form "New project" | The one door for a new project (Issues → New issue) |
@@ -60,10 +60,10 @@ python3 -m hub.registry
 ```
 
 ```bash
-python3 -m dashboard.build --out _site
+python3 -m fleetpage.build --out _site
 ```
 
-The last command reads GitHub. For a build with no network, see the top of `dashboard/build.py`.
+The last command reads GitHub. For a build with no network, see the top of `fleetpage/build.py`.
 
 ## What comes next
 

@@ -1,5 +1,5 @@
-"""The numbers of the fleet page (`dashboard/model.py`), with small made-up data."""
-from dashboard import model
+"""The numbers of the fleet page (`fleetpage/model.py`), with small made-up data."""
+from fleetpage import model
 from hub import registry
 
 NOW = model.ts("2026-11-13T18:00:00Z")

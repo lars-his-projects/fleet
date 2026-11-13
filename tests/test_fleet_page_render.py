@@ -1,7 +1,7 @@
-"""The HTML of the fleet page (`dashboard/page.py`): complete, balanced, and safe for text from outside."""
+"""The HTML of the fleet page (`fleetpage/page.py`): complete, balanced, and safe for text from outside."""
 import re
 
-from dashboard import model, page
+from fleetpage import model, page
 from hub import registry
 
 NOW = model.ts("2026-11-13T18:00:00Z")

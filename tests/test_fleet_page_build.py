@@ -1,7 +1,7 @@
-"""The build command of the fleet page (`dashboard/build.py`) with local files and no network."""
+"""The build command of the fleet page (`fleetpage/build.py`) with local files and no network."""
 import json
 
-from dashboard import build, sources
+from fleetpage import build, sources
 
 RESET = 1795147200      # 2026-11-20T04:00:00Z
 CONFIG = """

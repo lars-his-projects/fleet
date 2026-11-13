@@ -5,3 +5,6 @@ __pycache__/
 .ruff_cache/
 *.pyc
 .env
+# Python and tool caches: no part of a new project (#5910)
+.venv/
+# secrets of the project

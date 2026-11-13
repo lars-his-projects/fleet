@@ -38,3 +38,9 @@ stage = "polish"
 weight = 1                      # 1 until the go-live, then the stage "maintain" (D2)
 owners = ["Larspolo"]
 dashboard = "https://lars-his-projects.github.io/tumach-dance/"
+
+[projects.fleet]
+repo = "lars-his-projects/fleet"
+what = "The hub: the project list, the standards, the fleet page and the agent system of all projects."
+stage = "build"
+owners = ["Larspolo"]
