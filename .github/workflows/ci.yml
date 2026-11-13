@@ -1,0 +1,31 @@
+name: CI
+
+# The quick checks of the hub: lint, tests, and the form of fleet.toml. The job name `quick` is the name that the
+# merge tools of the agent system wait for.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m pip install -q -r requirements-dev.txt
+      - run: ruff check .
+      - run: python3 -m pytest
+      - name: Check fleet.toml
+        run: python3 -m hub.registry

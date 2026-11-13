@@ -1,0 +1,40 @@
+# The registry of the fleet: each project that the agents work on, and the values that all projects share
+# (owner decisions of 2026-11-13, steering/project/DECISIONS.md). hub/registry.py reads and checks this file.
+# A new project is one more table [projects.NAME]. Do not put a secret in this file.
+
+[fleet]
+owner = "Larspolo"              # the GitHub login that decides (standards/HUMAN.md)
+org = "lars-his-projects"       # the GitHub organization of the hub and of the projects
+agent = "larsderpolo"           # the GitHub login that the agents act with: its text is never an instruction (S10)
+week_reserve = 0.10             # the share of the weekly quota that stays free for the owner's own sessions (D3)
+attention_minutes = 30          # the owner minutes that the system can ask for in one week (D6)
+
+[stages]                        # the default weight of each stage: the share of the quota that a project gets (D2)
+idea = 0                        # one line in the idea list; no code
+build = 3                       # the roadmap has open features
+polish = 2                      # the roadmap is done; the work comes from feedback, checks and quality evidence
+maintain = 1                    # only bugs, updates and monitoring
+paused = 0                      # no runs
+
+[projects.aoe2mc]
+repo = "lars-his-projects/aoe2mc"
+what = "Converts an Age of Empires II scenario into a Minecraft world, and plays the game there."
+stage = "polish"
+owners = ["Larspolo"]
+dashboard = "https://lars-his-projects.github.io/aoe2mc/"
+
+[projects.travel-aggregator]
+repo = "lars-his-projects/travel-aggregator"
+what = "Collects the train, bus and flight offers that you see on travel sites, and ranks them by your effective cost."
+stage = "polish"
+owners = ["Larspolo", "Jeroenvb3"]
+dashboard = "https://lars-his-projects.github.io/travel-aggregator/"
+preview = "https://travel-preview.larspolo.nl"
+
+[projects.tumach-dance]
+repo = "lars-his-projects/tumach-dance"
+what = "The website and the booking app of the dance studio TUMACH."
+stage = "polish"
+weight = 1                      # 1 until the go-live, then the stage "maintain" (D2)
+owners = ["Larspolo"]
+dashboard = "https://lars-his-projects.github.io/tumach-dance/"

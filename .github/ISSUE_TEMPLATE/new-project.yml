@@ -1,0 +1,51 @@
+name: New project
+description: Start a new project in the fleet. Write what you know. The agents ask only what they cannot decide.
+title: "New project: "
+labels: ["new-project"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: A short name in lower case. It becomes the name of the repository.
+      placeholder: trip-planner
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What is it, and why do you want it? Some sentences are enough.
+    validations:
+      required: true
+  - type: textarea
+    id: users
+    attributes:
+      label: The users
+      description: Who uses it, and on which device?
+  - type: textarea
+    id: good
+    attributes:
+      label: The first good result
+      description: What must work before the project is useful to you?
+  - type: textarea
+    id: limits
+    attributes:
+      label: Limits and wishes (optional)
+      description: A stack that you want, a thing that the agents must not do, a service or a device that the project needs.
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Stage
+      description: "build: the agents make a roadmap and build it. idea: the agents write only a short proposal."
+      options:
+        - build
+        - idea
+      default: 0
+    validations:
+      required: true
+  - type: input
+    id: owners
+    attributes:
+      label: Other owners (optional)
+      description: The GitHub logins of other persons who steer this project.

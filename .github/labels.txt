@@ -1,0 +1,7 @@
+# name|color|description   (the Labels workflow creates or updates these labels on main)
+new-project|0e8a16|A new project for the fleet (the form "New project")
+needs-human|d93f0b|Waits for a person: standards/HUMAN.md
+decision|fbca04|A card: a decision with a recommendation
+step|c5def5|A card: a step that only the owner can do
+proposal|5319e7|A card: a new direction, a resource, an integration or a tool
+feedback|a2eeef|Feedback from a person who uses a product

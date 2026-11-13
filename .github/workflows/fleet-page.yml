@@ -1,0 +1,65 @@
+name: Fleet page
+
+# Builds the fleet page (dashboard/build.py) and publishes it to GitHub Pages: no Claude session and no quota
+# (owner decision of 2026-10-28 in aoe2mc, kept for the fleet). README.md, "The fleet page", has the one owner step.
+on:
+  schedule:
+    - cron: "7,37 * * * *"     # not at :00 and :30: GitHub delays the timers of those minutes most
+  push:
+    branches: [main]
+    paths: [dashboard/**, hub/**, fleet.toml, .github/workflows/fleet-page.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read     # checkout
+  pages: write       # the deploy, and the read of the Pages setting
+  id-token: write    # the deploy
+
+concurrency:
+  group: fleet-page
+  cancel-in-progress: false   # a deploy that stops halfway can leave Pages with no site
+
+jobs:
+  build:
+    # A private repository pays for its Actions minutes. There the timer builds nothing: a push and a start by hand do.
+    if: github.event_name != 'schedule' || github.repository_visibility == 'public'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      pages: ${{ steps.pages.outputs.on }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build the page and the data file
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          echo "event: ${{ github.event_name }} · visibility: ${{ github.repository_visibility }}"
+          python3 -m dashboard.build --out _site
+      - name: Find out if GitHub Pages is on
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/pages" --silent 2>/dev/null; then
+            echo "on=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "on=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GitHub Pages is off: the page is only the artifact github-pages of this run. See README.md, The fleet page."
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  deploy:
+    needs: build
+    if: needs.build.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
