@@ -19,8 +19,8 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - Progress: the roadmap features of each project and goal
   - Usage: the weekly curve against an even pace, and the split between the projects
   - Cost points: the usage of each lane, per PR, and in reports with no PR
-- [ ] `overview:publish` The page has a fixed address that the owner opens on a phone
-  - The hub is private: GitHub Pages needs a public repository or a paid plan (README, "The fleet page")
+- [x] `overview:publish` The page has a fixed address that the owner opens on a phone
+  - https://lars-his-projects.github.io/fleet/ (the hub is public since 2026-11-13; a timer builds the page twice per hour)
 - [ ] `overview:live` The page builds in each pacer cycle and shows each run at work with its lane and its ticket
 - [ ] `overview:value` The page shows value and not only PRs: accepted features per point of quota, rework,
   features that were removed later, and the usage with no PR by kind (refill, check, review, repair, no ticket)
@@ -50,7 +50,9 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
 
 - [x] `system:standards` One merged copy of the standards: principles, the human gate, design, resources
 - [ ] `system:move` The projects use their new home in the organization
-  - `repo` in `agent.toml`, the image names (`ghcr.io/larspolo/...`), the Pages addresses, the links in the documents
+  - `repo` in `agent.toml`, the image names (`ghcr.io/larspolo/...`), the Pages addresses, the links in the documents:
+    the PRs aoe2mc 6450, travel-aggregator 2864 and tumach-dance 863 of 2026-11-13
+  - The servers pull the new image names (the owner steps are in those PRs)
   - The scheduled tasks point at the new repositories
 - [ ] `system:source` The agent system (`framework/`) lives in the hub
   - Each project pins a version; a sync workflow brings a fix from the hub to each project

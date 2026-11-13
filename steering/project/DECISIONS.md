@@ -21,3 +21,6 @@ the owner chose another option, `agent`: an agent decided and logged it, `-`: no
 - 2026-11-13 · session · D6: the attention budget is 30 minutes per week · taken · S2
 - 2026-11-13 · session · D7: the previews run on a VM of their own; the live sites stay on other machines · taken · S10
 - 2026-11-13 · session · Phase 0 of the hub goes to `main` with the recommendations D1 to D7 · taken · S1
+- 2026-11-13 · session · The hub is public, and the fleet page is at https://lars-his-projects.github.io/fleet/ · taken · S4
+- 2026-11-13 · session · "move": each project uses its new name in the organization (one PR per project) · taken · S5
+- 2026-11-13 · session · "guard": a weekly pace from the start of the week in each project (`week_guard = true`, `week_free = 0`), until the one pacer exists · taken · S4

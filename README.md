@@ -31,19 +31,19 @@ this repository and write "set up the new project of issue N".
 
 ## The fleet page
 
+The page is at **https://lars-his-projects.github.io/fleet/**.
+
 The workflow **Fleet page** builds `index.html` and `data.json` from the `metrics` branch, the roadmap and the open
-issues of each project in `fleet.toml`. It runs on each change of the page code or of `fleet.toml`, by hand
-(Actions → Fleet page → Run workflow), and on a timer twice per hour when the repository is public.
+issues of each project in `fleet.toml`. It runs on a timer twice per hour, on each change of the page code or of
+`fleet.toml`, and by hand (Actions → Fleet page → Run workflow).
 
-One step of the owner gives the page an address:
+The hub is public, and it holds no secret. If the repository becomes private:
 
-1. Make the repository public (Settings → General → Danger Zone → Change visibility), or use a paid GitHub plan.
-   GitHub Pages does not work for a private repository on the free plan. The hub holds no secret.
-2. Settings → Pages → Source: **GitHub Actions**.
-3. Actions → Fleet page → Run workflow. The address is `https://lars-his-projects.github.io/fleet/`.
-
-While Pages is off, each run of the workflow keeps the page as the artifact `github-pages` (Actions → the run →
-Artifacts). The timer does not run for a private repository, because a private repository pays for its minutes.
+- GitHub Pages stops on the free plan. Each run of the workflow then keeps the page as the artifact `github-pages`
+  (Actions → the run → Artifacts).
+- The timer stops, because a private repository pays for its Actions minutes. A push and a start by hand still build.
+- To publish again: make the repository public, set Settings → Pages → Source to **GitHub Actions**, and start the
+  workflow one time.
 
 ## Commands
 
