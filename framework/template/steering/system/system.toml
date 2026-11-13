@@ -1,0 +1,23 @@
+# The owner's settings of the agent system (framework/tools/agent_config.py joins them with agent.toml).
+
+[pacing]
+max_runs = 4                    # the most runs at one time (framework/tools/usage.py)
+max_waiting_prs = 10            # flow brake: at this many old agent PRs the pacer starts only 1 repair run
+max_ci_queue = 5                # flow brake: at this many queued CI runs the pacer starts no run
+week_guard = true               # true: the 7-day usage limits the runs; false: only the 5-hour window counts
+week_free = 0.0                 # 0: the weekly pace counts from the start of the week (framework/tools/usage.py)
+week_share = 1.0                # the part of the weekly budget of the account that this project plans with: the hub sets it
+                                # from the weight of the project in its fleet.toml; 1: the project has the account alone
+week_reserve = 0.10             # the part of the week that the runs leave to the sessions of the owner, until 12 hours before the weekly reset
+weights = { haiku = 0.25, deep = 4.0 }   # a lane run in main runs (start value); deep: high effort
+reserved = ["haiku", "deep"]    # lanes whose tickets main runs never take; with deep, only deep runs do the reviews and the refill
+pacer = "workflow"              # pacer.yml plans the runs each 10 minutes (framework/tools/pacer.py); another value stops its loop
+starts = "session"              # the starter session of the fleet starts the planned runs (docs/STARTER.md of the hub): the project
+                                # needs no scheduled task and no secret; with no `starts` line, pacer.yml starts them with API triggers
+trigger = ""                    # with API triggers only: the ID of the scheduled task "NAME autopilot" (framework/docs/OPERATOR.md, section 3)
+
+[review]                        # the process review (`improve` skill): merged PRs, never hours
+gap = 80                        # merged PRs: the first gap, and the reset when the result of the reviews turns
+min_gap = 10                    # a review with a change halves a gap up to `gap`, down to this
+max_gap = 640                   # a review with no change doubles a gap from `gap` up, up to this
+owner_gap = 20                  # the gap when an owner session merged a PR since the last review
