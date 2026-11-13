@@ -87,8 +87,9 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - No scheduled task and no secret for each project (card 6). The test of 2026-11-13: a run with no repository
     cannot attach one, so shared tasks with no repository do not work. A session can start a run directly in a
     repository (the repository, the model and the prompt), with no task, no token and no secret
-  - Proposed, waits for the owner (card 6, "A2"): one starter, a cheap session with no repository, reads the plans
+  - Decision of the owner (card 6, "A2", 2026-11-13): one starter, a cheap session with no repository, reads the plans
     of the pacer workflows one time per hour and starts the runs; a fixed limit of starts per hour is in its script
+  - The rollout: first the hub and each new project; the three older projects follow after the proof below
   - Not proved yet: a run that the starter started does a ticket and merges a PR
 - [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
 - [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
