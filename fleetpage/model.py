@@ -181,7 +181,8 @@ def quota_now(records, now):
 
 
 def classify(issue):
-    """(kind, the persons that the ticket names) of a `needs-human` issue. The kinds are `KINDS`."""
+    """(kind, the persons that the ticket names) of a `needs-human` issue. The kinds are `KINDS`. The persons are the
+    assignees of the issue (owner, 2026-11-13). A card with no assignee can still have the old label `for-<name>`."""
     title = (issue.get("title") or "").lower()
     labels = [label if isinstance(label, str) else label.get("name", "") for label in issue.get("labels") or []]
     if "decision" in labels or title.startswith("decide"):
@@ -194,7 +195,8 @@ def classify(issue):
         kind = "bug"
     else:
         kind = "question"
-    return kind, sorted(label[4:] for label in labels if label.startswith("for-"))
+    who = [a if isinstance(a, str) else a.get("login", "") for a in issue.get("assignees") or []]
+    return kind, sorted(w for w in who if w) or sorted(label[4:] for label in labels if label.startswith("for-"))
 
 
 def waiting(issues, repo, now):

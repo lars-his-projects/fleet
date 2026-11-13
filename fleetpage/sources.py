@@ -79,7 +79,8 @@ def fetch_waiting(repo, token=None, pages=5):
     for page in range(1, pages + 1):
         batch = json.loads(get(f"/repos/{repo}/issues?state=open&labels=needs-human&per_page=100&page={page}", token))
         issues += [{"number": i.get("number"), "title": i.get("title"), "html_url": i.get("html_url"),
-                    "created_at": i.get("created_at"), "labels": [label.get("name", "") for label in i.get("labels") or []]}
+                    "created_at": i.get("created_at"), "labels": [label.get("name", "") for label in i.get("labels") or []],
+                    "assignees": [a.get("login", "") for a in i.get("assignees") or []]}
                    for i in batch if "pull_request" not in i]
         if len(batch) < 100:
             break
