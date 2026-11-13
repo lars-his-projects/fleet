@@ -22,6 +22,10 @@ Put scratch output in the scratchpad, in `out/` or in `_site/`. Never commit a b
 ## Code map
 
 - `fleet.toml` – the registry. `hub/registry.py` reads and checks it: `load()` gives a `Fleet` with its `Project`s.
+- `hub/budget.py` – the one budget of the fleet in advice mode: how many runs each project can have now. The fleet
+  page shows it.
+- `hub/starts.py` – the list of starts for the starter session (`python3 -m hub.starts`): the plans of the pacer
+  workflows of the projects with `starts = "session"`, with fixed limits. `docs/STARTER.md` describes the starter.
 - `fleetpage/` – the fleet page. `sources.py` does the reads (git for the `metrics` branch, the GitHub API for the
   roadmap and the issues). `model.py` computes each number with pure functions. `page.py` makes the HTML.
   `build.py` is the command.

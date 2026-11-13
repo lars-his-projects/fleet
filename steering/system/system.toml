@@ -12,7 +12,9 @@ week_reserve = 0.10             # the part of the week that the runs leave to th
 weights = { haiku = 0.25, deep = 4.0 }   # a lane run in Opus runs (start value); deep: high effort
 reserved = ["haiku", "deep"]    # lanes whose tickets Opus runs never take; with deep, only deep runs do the reviews and the refill
 # On since 2026-11-13: the owner finished the account steps (the secrets and the scheduled tasks, card 3).
-pacer = "workflow"              # pacer.yml starts the runs (framework/tools/pacer.py); another value stops its loop
+pacer = "workflow"              # pacer.yml plans the runs each 10 minutes (framework/tools/pacer.py); another value stops its loop
+starts = "session"              # the starter session of the fleet starts the planned runs (hub/starts.py, decision A2 of card 6);
+                                # with no `starts` line, pacer.yml starts them with the API triggers of the scheduled tasks
 trigger = "trig_01U5nL2JcLJ4ueit4xCkH6dT"   # the ID of the scheduled task "fleet autopilot": framework/docs/OPERATOR.md, section 3
 
 [review]                        # the process review (`improve` skill): merged PRs, never hours
