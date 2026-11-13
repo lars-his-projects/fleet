@@ -556,6 +556,11 @@ def prune(remote="origin", now=None, open_numbers=None):
         if not found or len(found) >= 2000:            # never delete the claims of live tickets on a partial read
             fail("prune: no open issue read: nothing deleted")
         open_numbers = {i["number"] for i in found}
+    heads = git("ls-remote", "--heads", remote, "claim/*", check=False)
+    if heads.returncode:
+        fail("prune: git ls-remote of the claim refs failed")
+    if not heads.stdout.strip():                        # no claim ref (a new project): the fetch below exits 1 for no ref
+        return []
     if git("fetch", "-q", "--depth", "1", "--prune", remote, f"+refs/heads/claim/*:{NS}/*", check=False).returncode:
         fail("prune: git fetch of the claim refs failed")
     lines = git("for-each-ref", NS, "--format=%(refname:lstrip=2) %(committerdate:unix)").stdout.split("\n")
