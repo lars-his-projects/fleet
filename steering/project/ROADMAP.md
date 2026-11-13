@@ -50,10 +50,10 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
 
 - [x] `system:standards` One merged copy of the standards: principles, the human gate, design, resources
 - [ ] `system:move` The projects use their new home in the organization
-  - `repo` in `agent.toml`, the image names (`ghcr.io/larspolo/...`), the Pages addresses, the links in the documents:
-    the PRs aoe2mc 6450, travel-aggregator 2864 and tumach-dance 863 of 2026-11-13
-  - The servers pull the new image names (the owner steps are in those PRs)
-  - The scheduled tasks point at the new repositories
+  - Done on 2026-11-13 (the PRs aoe2mc 6450, travel-aggregator 2864 and tumach-dance 863): `repo` in `agent.toml`,
+    the image names, the Pages addresses, the links in the documents
+  - Open: the server pulls the new image names (`ghcr.io/lars-his-projects/...`; a new package can be private)
+  - Open: the scheduled tasks point at the new repositories
 - [ ] `system:source` The agent system (`framework/`) lives in the hub
   - Each project pins a version; a sync workflow brings a fix from the hub to each project
   - The three copies of the system principles are replaced by `standards/`
@@ -84,6 +84,8 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
 - [ ] `workers:real-sites` An agent uses real travel sites in a browser profile of its own on polopc
   - A decision line and the new text of P1 in travel-aggregator
 - [ ] `setup:preview-operator` One compose stack that the owner starts one time on the server
+  - Input: the server configuration is in the private repository `lars-his-projects/server-config`; today the owner
+    pulls it on the server by hand
   - It reads `fleet.toml` and the folder `deploy/preview/` of each project from GitHub, with outbound connections only
   - It applies a new image and a changed compose file, and it publishes the state of each preview
   - It refuses privileged containers, host folders and the Docker socket; the previews have a VM of their own
