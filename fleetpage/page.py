@@ -331,6 +331,34 @@ def week_title(week):
     return "This week" if week["current"] else f"Week of {start.day} {start:%b}"
 
 
+def budget_fig(m):
+    b = m.get("budget")
+    if not b or not m["quota"]:
+        return ""
+    used = pct(m["quota"]["seven_day"]["used"])
+    if b["mode"] == "free":
+        state = f"The week is at or behind an even pace ({used} used, the pace is {pct(b['pace'])}): the budget gives no limit now."
+    else:
+        state = (f"The week is ahead of an even pace ({used} used, the pace is {pct(b['pace'])}). The rest of the budget carries "
+                 f"{b['rate']:.2f} runs to the reset: {b['slots']} in this cycle.")
+    rows = []
+    for i, p in enumerate(m["projects"]):
+        r = b["projects"].get(p["name"])
+        if not r:
+            continue
+        runs = "no limit" if r["runs"] is None else str(r["runs"])
+        own = "–" if not p["pacer"] else str(p["pacer"]["target"])
+        rows.append(f'<tr><td>{key(i)}{E(p["name"])}</td><td class="n">{pct(r["share"])}</td><td class="n">{pct(r["actual"])}</td>'
+                    f'<td class="n">{runs}</td><td class="n">{own}</td></tr>')
+    reserve = f" It keeps {pct(m['fleet']['week_reserve'])} of the week free for the owner." if m["fleet"]["week_reserve"] else ""
+    return ('<div class="fig"><h3>The one budget (advice)</h3><p class="sub">What one pacer for the account gives each project in '
+            f"this cycle.{reserve} No pacer follows it yet (roadmap <code>pacer:one</code>): each project still has its own pacer. "
+            f"{E(state)}</p><div class=\"tw\"><table><thead><tr><th>Project</th><th class=\"n\">Share by weight</th>"
+            '<th class="n">Share of the usage, this week</th><th class="n">Runs by the budget</th><th class="n">Target of its own pacer</th>'
+            f'</tr></thead><tbody>{"".join(rows)}</tbody></table></div>'
+            '<p class="s">Share by weight: among the projects that have work now. A project with no work gets 0 runs.</p></div>')
+
+
 def usage(m):
     if not m["weeks"]:
         return "<p>No pacer record yet: the weekly curve needs the <code>metrics</code> branch of a project.</p>"
@@ -370,7 +398,7 @@ def usage(m):
                  f'</tr></thead><tbody>{"".join(rows)}</tbody></table></div></details></div>')
     return ('<div class="fig"><h3>The weekly quota</h3><p class="sub">Usage of the 7-day window from one reset to the next. '
             f'The thin line is an even pace to 100 % at the reset.</p><div class="legend">{legend}</div><div class="panels">{panels}</div></div>'
-            + split)
+            + budget_fig(m) + split)
 
 
 def cost(m):

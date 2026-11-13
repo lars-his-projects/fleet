@@ -37,6 +37,9 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - `week_reserve` of the week stays free for the owner's sessions; the pacer releases it in the last hours
   - The weights of `fleet.toml` split the budget; a project with no ready work gives its share to the next project
   - Each week the page shows the usage at the reset and the cause of each unused point
+  - Stage 1, done on 2026-11-13: the budget in advice mode. `hub/budget.py` computes the split, and the fleet page
+    shows it next to the target of each pacer. No pacer follows it yet
+  - Stage 2: the pacer of each project reads the advice and starts not more than its runs
 - [ ] `pacer:ladder` The work ladder: when a step is empty, the quota goes one step down
   - 1 feedback and bugs; 2 approved roadmap features; 3 checks that a machine can do with a real device;
     4 quality work with evidence; 5 experiments of the lab; 6 prototypes of a proposed direction on a preview branch

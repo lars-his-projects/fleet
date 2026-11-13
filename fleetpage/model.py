@@ -9,6 +9,8 @@ All projects use one Claude account, so each pacer record shows the same quota. 
 import datetime
 import re
 
+from hub import budget
+
 UTC = datetime.timezone.utc
 WEEK = 7 * 24 * 3600        # seconds of one quota week
 BUCKET = 2                  # hours of one point of the weekly curve
@@ -160,6 +162,7 @@ def pacer_state(records, weeks, now):
     return {"at": newest["at"], "age_minutes": round((now - ts(newest["at"])).total_seconds() / 60),
             "target": newest.get("target"), "claims": newest.get("claims") or 0, "ready": newest.get("ready") or 0,
             "paused": bool(paused and paused.group(1) == "True"), "problems": list(newest.get("problems") or []),
+            "refill": newest.get("refill") or 0, "burn7": newest.get("burn7"),
             "idle_week": round(idle / cycles, 3) if cycles else None}
 
 
@@ -206,6 +209,26 @@ def waiting(issues, repo, now):
     return sorted(rows, key=lambda r: (KINDS.index(r["kind"]), -(r["number"] or 0)))
 
 
+def fleet_budget(fleet, quota, projects, weeks, now):
+    """The advice of the one budget for this cycle (`hub/budget.py`), or None with no quota record.
+
+    A project has work when its pacer sees a ready ticket, a run at work or a refill. The burn of one run-hour is the
+    median of the values that the pacers of the projects measured.
+    """
+    if not quota:
+        return None
+    burns = sorted(p["pacer"]["burn7"] for p in projects if p["pacer"] and p["pacer"].get("burn7"))
+    burn = burns[len(burns) // 2] if burns else 0.005
+    current = weeks[-1]["split"] if weeks and weeks[-1]["current"] else {}
+    rows = [{"name": p["name"], "weight": p["weight"], "spent": current.get(p["name"], {}).get("usd", 0.0),
+             "work": bool(p["pacer"] and (p["pacer"]["ready"] or p["pacer"]["claims"] or p["pacer"]["refill"]))}
+            for p in projects]
+    advice = budget.allocate(quota["seven_day"]["used"], 168 - quota["week_hours"], burn, rows, now.timestamp(),
+                             reserve=fleet.week_reserve)
+    advice["burn"] = burn
+    return advice
+
+
 def build(fleet, loaded, now):
     """The model of the page.
 
@@ -244,11 +267,13 @@ def build(fleet, loaded, now):
             "last_report": runs["last_report"], "reports_24h": runs["reports_24h"], "prs_7d": runs["prs_7d"],
             "usd_7d": round(runs["usd_7d"], 2), "errors": list(d.get("errors") or [])})
     order = {"haiku": 0, "main": 1, "deep": 2}
+    quota = quota_now(all_pacer, now)
     return {
         "generated": iso(now),
         "fleet": {"owner": fleet.owner, "org": fleet.org, "agent": fleet.agent, "week_reserve": fleet.week_reserve,
                   "attention_minutes": fleet.attention_minutes},
-        "quota": quota_now(all_pacer, now),
+        "quota": quota,
+        "budget": fleet_budget(fleet, quota, projects, weeks, now),
         "weeks": weeks,
         "lanes": [{"lane": lane, **{k: round(v, 2) for k, v in lanes[lane].items()}}
                   for lane in sorted(lanes, key=lambda x: (order.get(x, 9), x))],
