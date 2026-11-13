@@ -48,12 +48,12 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
 
 ## 3. One agent system
 
-- [x] `system:standards` One merged copy of the standards: principles, the human gate, design, resources
-- [ ] `system:move` The projects use their new home in the organization
+- [x] `system:standards` One merged copy of the standards: principles, the human gate, design, resources, feedback
+- [x] `system:move` The projects use their new home in the organization
   - Done on 2026-11-13 (the PRs aoe2mc 6450, travel-aggregator 2864 and tumach-dance 863): `repo` in `agent.toml`,
     the image names, the Pages addresses, the links in the documents
-  - Open: the server pulls the new image names (`ghcr.io/lars-his-projects/...`; a new package can be private)
-  - Open: the scheduled tasks point at the new repositories
+  - The server pulls the new image names (2026-11-13)
+  - The owner checks the scheduled tasks and one `.env` value: card 2 of this repository
 - [ ] `system:source` The agent system (`framework/`) lives in the hub
   - Each project pins a version; a sync workflow brings a fix from the hub to each project
   - The three copies of the system principles are replaced by `standards/`
@@ -64,31 +64,31 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
 
 - [ ] `human:cards` The card formats of `standards/HUMAN.md` in each project
   - A lint refuses a card with no minutes, no default, or no reason why a machine cannot do it
-- [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
-- [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
-- [ ] `human:budget` The attention budget: minutes on each card; the inbox sorts by value for each minute
-- [ ] `human:trust` The rate of taken recommendations for each kind of decision moves a kind between "ask first" and
-  "decide and log"
-- [x] `projects:form` The form "New project" in the hub: the idea, the users, the first good result, limits
-- [ ] `projects:auto` A new project needs no other step of the owner
-  - A workflow makes the repository from the template, adds it to `fleet.toml`, and sets the labels, the rules and Pages
-  - A run writes the roadmap; the owner gets one card: approve or change the roadmap
-  - The skill `/new-project` fills the same form with a dialogue
-- [ ] `projects:house-stack` A template with a login, a preview, the feedback button, usage counts and a deploy kit
-  that work on the first day, and one design system for the fleet with a theme for each project
 - [ ] `workers:polopc` polopc is a worker: a user `agent`, containers, a worker service that asks for work
   - The environment of a project is a container file in git; an agent changes it by a PR
   - One bootstrap command for the owner
-- [ ] `workers:devices` A ticket that needs a device has a label; the worker sends a heartbeat; the pacer includes
-  such a ticket only while a worker with the device is online
-- [ ] `workers:real-sites` An agent uses real travel sites in a browser profile of its own on polopc
-  - A decision line and the new text of P1 in travel-aggregator
 - [ ] `setup:preview-operator` One compose stack that the owner starts one time on the server
   - Input: the server configuration is in the private repository `lars-his-projects/server-config`; today the owner
     pulls it on the server by hand
   - It reads `fleet.toml` and the folder `deploy/preview/` of each project from GitHub, with outbound connections only
   - It applies a new image and a changed compose file, and it publishes the state of each preview
   - It refuses privileged containers, host folders and the Docker socket; the previews have a VM of their own
+- [ ] `projects:auto` A new project needs no other step of the owner
+  - A workflow makes the repository from the template, adds it to `fleet.toml`, and sets the labels, the rules and Pages
+  - A run writes the roadmap; the owner gets one card: approve or change the roadmap
+  - The skill `/new-project` fills the same form with a dialogue
+- [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
+- [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
+- [ ] `human:budget` The attention budget: minutes on each card; the inbox sorts by value for each minute
+- [ ] `human:trust` The rate of taken recommendations for each kind of decision moves a kind between "ask first" and
+  "decide and log"
+- [x] `projects:form` The form "New project" in the hub: the idea, the users, the first good result, limits
+- [ ] `projects:house-stack` A template with a login, a preview, the feedback button, usage counts and a deploy kit
+  that work on the first day, and one design system for the fleet with a theme for each project
+- [ ] `workers:devices` A ticket that needs a device has a label; the worker sends a heartbeat; the pacer includes
+  such a ticket only while a worker with the device is online
+- [ ] `workers:real-sites` An agent uses real travel sites in a browser profile of its own on polopc
+  - A decision line and the new text of P1 in travel-aggregator
 - [ ] `setup:secrets` A file in the repository says what each variable is; the operator makes the values on the server
   - A key that only the owner has goes one time into a shared store on the server, for all projects
 - [ ] `setup:live-kit` Each project has `deploy/live/`: a compose file, an `.env` example with one comment per
