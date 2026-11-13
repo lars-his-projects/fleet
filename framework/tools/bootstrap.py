@@ -96,10 +96,13 @@ def github_calls(repo, labels, title="Agent status"):
                      "-f", f"labels[]={CONFIG['status']['label']}"]]
 
 
-def bootstrap(target, repo, branch="main"):
+def bootstrap(target, repo, branch="main", owner=None):
     """Write the files into target. Returns (copied, written, todo): the generic files, the stubs, the specific files
-    that the owner or a first run must write."""
-    owner, name = repo.split("/")
+    that the owner or a first run must write. owner: the GitHub login of the owner of the new project; with none,
+    the owner of this project. It is not the first part of `repo`: a repository of an organization has an owner
+    login of its own (the hub and street-quiz got the name of the organization as their owner, 2026-11-13)."""
+    name = repo.split("/")[1]
+    owner = owner or CONFIG["owner"]
     files = rows()
     values = {"repo": repo, "owner": owner, "name": name, "branch": branch, **CONFIG["commands"],
               "generic": "@framework/CLAUDE.md"}      # the generic rules: the copy of framework/CLAUDE.md (#4193)
@@ -135,12 +138,13 @@ def main(argv=None):
     ap.add_argument("target")
     ap.add_argument("--repo", required=True, help="OWNER/NAME of the new repository")
     ap.add_argument("--branch", default="main")
+    ap.add_argument("--owner", help="the GitHub login of the owner of the new project (default: the owner of this project)")
     ap.add_argument("--github", action="store_true", help="also make the labels and the status issue (gh api)")
     a = ap.parse_args(argv)
     if a.repo.count("/") != 1:
         ap.error("--repo must be OWNER/NAME")
-    copied, written, todo = bootstrap(a.target, a.repo, a.branch)
-    owner, name = a.repo.split("/")
+    copied, written, todo = bootstrap(a.target, a.repo, a.branch, a.owner)
+    owner, name = a.owner or CONFIG["owner"], a.repo.split("/")[1]
     print(f"Copied {len(copied)} generic files and wrote {len(written)} starts ({', '.join(written)}) to {a.target}.")
     print("\nWrite these specific files for the project (see framework/docs/SYSTEM.md, \"Generic and specific files\"):")
     print("".join(f"- {p}\n" for p in todo))

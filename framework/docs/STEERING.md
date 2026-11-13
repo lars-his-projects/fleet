@@ -112,7 +112,7 @@ a new API token and change the secret). The scheduled tasks have no schedule of 
 
 All your projects use one subscription. Each project plans with its share of the week (`week_share`), and the runs
 leave a part of the week to your own sessions (`week_reserve`) until 12 hours before the weekly reset. Both values
-are in `[pacing]` of `steering/system/system.toml`; the hub (`lars-his-projects/fleet`) gives the shares.
+are in `[pacing]` of `steering/system/system.toml`; the hub gives the shares.
 
 ## CI and the merge
 

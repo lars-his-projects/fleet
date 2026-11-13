@@ -526,7 +526,7 @@ def switch(config=None):
 
 
 def starter(config=None):
-    """True when a starter session of the fleet starts the runs (`starts = "session"` in `[pacing]`): the pacer plans
+    """True when a starter session of the hub starts the runs (`starts = "session"` in `[pacing]`): the pacer plans
     and logs each cycle, and sends no call. Then a project needs no scheduled task and no secret of its own (the hub,
     decision A2 of 2026-11-13). The starter reads `k` and `plan` of the newest record."""
     return (usage.CONFIG if config is None else config).get("pacing", {}).get("starts") == "session"

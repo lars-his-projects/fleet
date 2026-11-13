@@ -1,4 +1,4 @@
-"""framework/tools/pacer.py with `starts = "session"` in `[pacing]`: a starter session of the fleet starts the runs, so the
+"""framework/tools/pacer.py with `starts = "session"` in `[pacing]`: a starter session of the hub starts the runs, so the
 pacer plans and logs each cycle and sends no call (the hub, decision A2 of 2026-11-13)."""
 import json
 

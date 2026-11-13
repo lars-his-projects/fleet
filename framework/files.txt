@@ -83,6 +83,7 @@ framework/tests/test_claim_code_span.py
 framework/tests/test_claim_conflict.py
 framework/tests/test_claim_exit.py
 framework/tests/test_claim_first.py
+framework/tests/test_claim_prune_empty.py
 framework/tests/test_claim_refill.py
 framework/tests/test_claim_release_label.py
 framework/tests/test_refill_all_closed.py
@@ -136,11 +137,13 @@ framework/tests/test_merge_jsonl.py
 framework/tests/test_merge_jsonl_order.py
 framework/tests/test_pacer.py
 framework/tests/test_pacer_script.py
+framework/tests/test_pacer_starter.py
 framework/tests/test_pacer_exit.py
 framework/tests/test_pacer_restart.py
 framework/tests/test_usage.py
 framework/tests/test_usage_status_once.py
 framework/tests/test_usage_week.py
+framework/tests/test_usage_share.py
 framework/tests/test_new_repo.py
 framework/tests/test_claim_adopt_closed.py
 framework/tests/test_claim_closed.py

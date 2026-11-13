@@ -138,7 +138,7 @@ makes one `Process: <bottleneck>` ticket for it on the board.
 
 The projects of one account share its week (2026-11-13). Each pacer reads the same 7-day usage, so each project plans
 with its part of the weekly budget: `week_share` in `[pacing]` of `steering/system/system.toml` (the weight of the
-project in `fleet.toml` of the hub; 1: the project has the account alone). The runs leave `week_reserve` of the week
+project in the registry of the hub; 1: the project has the account alone). The runs leave `week_reserve` of the week
 to the sessions of the owner: the pace and the budget count to 1 − `week_reserve`, and to 1 again in the last
 12 hours before the weekly reset, so that the week ends near 100 %. Without these two values, four projects that
 were ahead of the pace each planned with the whole budget of the account.
