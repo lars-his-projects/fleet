@@ -11,7 +11,7 @@ reserved = ["haiku", "deep"]    # lanes whose tickets Opus runs never take; with
 # The pacer stays OFF until the owner finishes the account steps (secrets and scheduled task).
 # Then the owner sets pacer = "workflow" and trigger = the ID of the scheduled task.
 pacer = "off"                   # pacer.yml starts the runs (framework/tools/pacer.py); another value stops its loop
-trigger = ""                    # the ID of the scheduled task "NAME autopilot": framework/docs/OPERATOR.md, section 3
+trigger = "trig_01U5nL2JcLJ4ueit4xCkH6dT"   # the ID of the scheduled task "fleet autopilot": framework/docs/OPERATOR.md, section 3
 
 [review]                        # the process review (`improve` skill): merged PRs, never hours
 gap = 80                        # merged PRs: the first gap, and the reset when the result of the reviews turns
