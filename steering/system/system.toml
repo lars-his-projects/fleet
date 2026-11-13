@@ -1,16 +1,16 @@
 # The owner's settings of the agent system (framework/tools/agent_config.py joins them with agent.toml).
 
 [pacing]
-max_runs = 16                   # the most runs at one time (framework/tools/usage.py)
+max_runs = 4                    # the most runs at one time (framework/tools/usage.py); small while each project has its own pacer
+                                # on the same quota (roadmap pacer:one, stage 2 removes this limit)
 max_waiting_prs = 10            # flow brake: at this many old agent PRs the pacer starts only 1 repair run
 max_ci_queue = 5                # flow brake: at this many queued CI runs the pacer starts no run
 week_free = 0.0                 # below this 7-day usage the runs fill each 5-hour window; 0: the weekly pace counts from the start of the week (framework/tools/usage.py)
 week_guard = true               # true: the 7-day usage limits the runs; false: only the 5-hour window counts
 weights = { haiku = 0.25, deep = 4.0 }   # a lane run in Opus runs (start value); deep: high effort
 reserved = ["haiku", "deep"]    # lanes whose tickets Opus runs never take; with deep, only deep runs do the reviews and the refill
-# The pacer stays OFF until the owner finishes the account steps (secrets and scheduled task).
-# Then the owner sets pacer = "workflow" and trigger = the ID of the scheduled task.
-pacer = "off"                   # pacer.yml starts the runs (framework/tools/pacer.py); another value stops its loop
+# On since 2026-11-13: the owner finished the account steps (the secrets and the scheduled tasks, card 3).
+pacer = "workflow"              # pacer.yml starts the runs (framework/tools/pacer.py); another value stops its loop
 trigger = "trig_01U5nL2JcLJ4ueit4xCkH6dT"   # the ID of the scheduled task "fleet autopilot": framework/docs/OPERATOR.md, section 3
 
 [review]                        # the process review (`improve` skill): merged PRs, never hours
