@@ -3,6 +3,25 @@
 Decision A2 of card 6 (owner, 2026-11-13). The goal is principle S8: a new project needs no setup from the owner.
 Before, each project needed three scheduled tasks, three API tokens and seven secrets that only the owner can make.
 
+## Status on 2026-11-13: not in use
+
+The parts were tested on 2026-11-13. The starter needs a permission that only the owner can give (card 6).
+
+| Part | Result |
+|---|---|
+| A session with a person starts a run in a repository (the repository, the model and the prompt) | Works |
+| A session with no repository has the tool for that, and it can read the public hub | Works |
+| A timer sends a tick to the starter session at a scheduled time | Works. A start of the timer by hand makes a new session with no tools: do not use it |
+| The starter downloads the hub and runs `python3 -m hub.starts` | Refused by the permission check of the platform ("Unauthorized Access") |
+| The starter reads the registry and the pacer records as data, with no code from a repository | Works |
+| The starter session, with no person, starts a run | Refused by the permission check: the owner must allow the tool in the settings, or confirm each call |
+
+Until the owner gives that permission, no project depends on the starter. The hub starts its runs with its scheduled
+tasks. A project with `starts = "session"` (street-quiz) plans its runs and starts none.
+
+The text below is the design. The second form of the starter read only data (the registry and the newest pacer
+record of each project) and used the same rules as `hub/starts.py`.
+
 ## How a run starts
 
 1. The pacer workflow of a project (`pacer.yml`, `framework/tools/pacer.py`) reads the quota each 10 minutes and plans
