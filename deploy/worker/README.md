@@ -119,6 +119,11 @@ run. The hub starts the same workflow for itself with `workflow_dispatch`.
 - The caller gives the one secret by name. Never write `secrets: inherit`.
 - Start a run: the tab "Actions" of the project, the workflow `worker-run`, "Run workflow". An agent with write
   access starts it with the GitHub tool `actions_run_trigger`.
+- The pacer of the project starts it too (`framework/tools/pacer.py`, `start_worker`): at most one run, while a
+  `lane:device` ticket is ready, the heartbeat of the worker is fresh and no worker run waits or works. The pacer
+  starts the workflow `worker-run.yml` of its own repository, so the caller of a project must have this file name.
+  A project reads the heartbeat from the hub: it has the line `hub = "lars-his-projects/fleet"` in `[pacing]` of
+  its `steering/system/system.toml`. With the worker offline, the pacer starts nothing and no job waits.
 
 ### How a PR of a worker run gets its CI
 

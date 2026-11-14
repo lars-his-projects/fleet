@@ -37,6 +37,10 @@ comments wait (`feedback.py`: a briefed run skips step 3, and the answers waited
 call fails, the pacer releases the claim of its run.
 A brief also names up to 2 next tickets (`next:`, #5076) beyond the runs of the cycle, related ones first: the run
 claims one itself after its PR, so it skips a fresh start. The pacer does not claim them (the claims stay 1 per run).
+A worker run (hub #13): `usage.fire` plans at most one run of the lane `device` while a `lane:device` ticket is ready
+and the heartbeat of the worker is fresh (`usage.device_runs`). The pacer starts it with a dispatch of the worker
+workflow (`start_worker`), also with a starter session, and with no brief: the run does steps 1 to 5 itself. With the
+worker offline, it starts nothing, so no job waits in the queue of GitHub.
 A stuck ticket (`claim.py 0 --stuck`: its run stopped) comes before the candidates (autopilot step 2): the pacer takes
 it over for one run (`claim.py N --takeover` with the run name) and adds a `takeover:` line with the branch of its PR.
 Runs with no brief raced for the same stuck PRs, and each lost race cost a cycle start (#4356).
@@ -192,6 +196,39 @@ def queues(open_all, refs, now, tasks):
     held = dashboard.claimed(refs or [], datetime.datetime.fromtimestamp(now, datetime.timezone.utc))
     return {t: [i for i in dashboard.candidates(open_all, busy, lane=None if t == "main" else t)
                 if i["number"] not in held] for t in sorted(set(tasks))}
+
+
+WORKER = "worker-run.yml"                    # the workflow of a worker run in this repository (hub #13)
+WORKER_PROMPT = "/scheduled max lane device"  # the prompt of a worker run
+
+
+def worker_busy(api=None):
+    """True while a run of the worker workflow waits or works (each state but `completed`). The job of the workflow
+    has one concurrency group, so a second start would wait in the queue of GitHub."""
+    import dashboard
+    runs = (api or dashboard.api)(f"actions/workflows/{WORKER}/runs?per_page=10").get("workflow_runs", [])
+    return any(r.get("status") != "completed" for r in runs)
+
+
+def start_worker(api=None, branch=None):
+    """Start one worker run: a `workflow_dispatch` of the worker workflow of this repository with the prompt of the
+    device lane. The token of the job of pacer.yml can do it (`actions: write`): a dispatch is the one event of a job
+    token that starts a workflow. The hub starts its own `worker-run.yml`; a project starts its small caller of the
+    hub workflow (`deploy/worker/README.md` of the hub, "How a project calls it"), so its run has its own token.
+    Returns None, or the reason why it started no run. It never raises: a fault here does not stop the cloud runs."""
+    import dashboard
+    api = api or dashboard.api
+    try:
+        if worker_busy(api):
+            return "a worker run waits or works"
+        try:
+            api(f"actions/workflows/{WORKER}/dispatches", "POST",
+                {"ref": branch or usage.CONFIG.get("branch", "main"), "inputs": {"prompt": WORKER_PROMPT}})
+        except json.JSONDecodeError:                    # the answer 204 has no body
+            pass
+    except Exception as e:                              # HTTP 404: no worker workflow; 403: no `actions: write`
+        return f"no dispatch of {WORKER} ({e})"
+    return None
 
 
 FAILED = ("action_required", "cancelled", "failure", "startup_failure", "timed_out")   # a check with this result is red
@@ -571,6 +608,9 @@ def main(argv=None, env=os.environ):
     if many:
         line += " · accounts " + ", ".join(f"{n} missing {missing[n]:.1f}" if n in missing else f"{n} no read"
                                            for n in envs)
+    full_k, full_runs = k, dict(runs)                  # the plan of the record: with the worker run
+    device = runs.pop(usage.DEVICE, 0)                 # a worker run is no call of a task: `start_worker`
+    k -= device
     plan_only = starter()                              # the starter session starts the runs: plan and log only
     has = lambda acct, task: not plan_only and has_url(envs[acct], task)
     todo = [(task, envs[acct][f"PACER_URL_{task.upper()}"], envs[acct][f"PACER_TOKEN_{task.upper()}"], acct)
@@ -623,6 +663,10 @@ def main(argv=None, env=os.environ):
                     break
     if a.dry_run:
         started = {t: sum(1 for x, *_ in todo if x == t) for t in started}
+    no_worker = None
+    if usage.DEVICE in full_runs:                       # also with a starter session: it starts only cloud sessions
+        no_worker = start_worker() if device and not a.dry_run else None
+        started[usage.DEVICE] = device if not no_worker else 0
     if out.get("flow") is not None and not a.dry_run:   # the brake slows the runs: report it and ask for a faster CI
         try:
             if n := brake_ticket(out.get("flow_reason", "flow brake")):
@@ -630,26 +674,27 @@ def main(argv=None, env=os.environ):
         except Exception as e:                          # the report never stops the starts
             print(f"no brake ticket: {e}", file=sys.stderr)
     at, gh = datetime.datetime.now(datetime.timezone.utc), github_limit(env)
-    print(f"Pacer {at:%H:%MZ}: K={k}, "
-          + ", ".join(f"{t} {n}" for t, n in runs.items())
+    print(f"Pacer {at:%H:%MZ}: K={full_k}, "
+          + ", ".join(f"{t} {n}" for t, n in full_runs.items())
           + f". {'Would start' if a.dry_run else 'Started'} " + json.dumps(started)
           + (", the starter session starts them" if plan_only else "")
           + (f", no URL for {', '.join(skipped)}" if skipped else "")
           + (f", hourly limit: {', '.join(sorted({t for _, t in limited}))}" if limited else "")
           + (f", {'; '.join(unread)}" if unread else "")
+          + (f", no worker run: {no_worker}" if no_worker else "")
           + (f", failed: {'; '.join(failed)}" if failed else "")
           + (f", briefs {' '.join(f'#{n}' for n in briefs.given)}" if briefs.given else "") + f". {line}"
           + (f" · GitHub API {gh['used']}/{gh['limit']} (reset {gh['reset']})" if gh else ""))
     if a.log and not a.dry_run:
         problems = ([f"no URL: {t}" for t in skipped] + unread
                     + [f"hourly limit: {t}" + (f" (account {x})" if many else "") for x, t in sorted(limited, key=str)]
-                    + failed)
+                    + ([f"no worker run: {no_worker}"] if no_worker else []) + failed)
         try:                                            # the log never stops the starts
             with open(a.log, "a") as f:
                 quota = {n: {"five_hour": u["five_hour"][0], "seven_day": u.get("seven_day", (None,))[0],
                              "missing": round(missing[n], 2) if n in missing else None}
                          for n, u in reads.items()} if many else None          # the quota of each account (#4239)
-                f.write(json.dumps({**record(at, found, burn, burn7, k, runs, started, line, problems, gh, quota),
+                f.write(json.dumps({**record(at, found, burn, burn7, full_k, full_runs, started, line, problems, gh, quota),
                                     "briefs": briefs.given, "next": {str(n): t for n, t in briefs.next.items()}}
                                    | ({"starts": "session"} if plan_only else {})
                                    | ({"accounts": {x: sum(c for (y, _), c in count.items() if y == x) for x in envs}}

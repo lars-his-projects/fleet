@@ -59,6 +59,9 @@ MAX_FIRE = CONFIG.get("pacing", {}).get("max_fire", 8)   # runs that the pacer s
 REFILL = CONFIG.get("pacing", {}).get("refill_runs", 1)   # runs beyond the ready tickets: each refills one epic (#609, #650)
 PENDING = 12                # minutes: a run that the pacer started and that has no claim yet counts as a claim
 REFILL_GAP = CONFIG.get("pacing", {}).get("refill_gap", 60)   # minutes after a refill lock with no refill run
+DEVICE = "device"           # the lane of the tickets that need a device: only a worker run takes them (hub #13)
+HEARTBEAT = CONFIG.get("pacing", {}).get("heartbeat", 30)   # minutes between two heartbeats of the worker (`worker-heartbeat.yml` of the hub)
+HUB = CONFIG.get("pacing", {}).get("hub") or None   # the repository with the heartbeat on its branch `metrics`; none: this one
 CALL = ["claude", "-p", "Reply with OK.", "--model", "claude-haiku-5-5", "--output-format", "stream-json", "--verbose"]
 
 
@@ -357,6 +360,48 @@ def free_sources(root=None, epics=None, holds=held):
     return [f"{len(free)} roadmap features with no epic"] * bool(free) + [f"{fallbacks} fallbacks"] * bool(fallbacks)
 
 
+def worker_online(records, now, period=HEARTBEAT):
+    """True when the newest heartbeat of a worker is less than 2 periods old (`period` minutes each; the rule of the
+    fleet page, `fleetpage.model.worker_state`). records: the JSON of the files `worker/*.json` of the branch
+    `metrics` ({"worker": name, "time": "2026-11-14T12:07:00Z"}); a record with no valid time does not count.
+    now: Unix seconds."""
+    for r in records or ():
+        try:
+            at = datetime.datetime.strptime(r["time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc)
+        except (KeyError, TypeError, ValueError):
+            continue
+        if now - at.timestamp() < 2 * period * 60:
+            return True
+    return False
+
+
+def read_heartbeats(api=None, hub=HUB):
+    """The heartbeat records of the workers: the files `worker/*.json` of the branch `metrics` of the hub (`hub` in
+    `[pacing]`, else this repository). A read that fails gives no record: then the worker counts as offline, and
+    no job waits in the queue of GitHub."""
+    import base64
+    import dashboard
+    api, out = api or dashboard.api, []
+    try:
+        for f in api("contents/worker?ref=metrics", repo=hub):
+            if f.get("type") == "file" and f.get("name", "").endswith(".json"):
+                r = json.loads(base64.b64decode(api(f"contents/worker/{f['name']}?ref=metrics", repo=hub)["content"]))
+                if isinstance(r, dict):
+                    out.append(r)
+    except Exception as e:                              # no branch, no folder, HTTP 404 or 403, a bad file
+        print(f"no heartbeat of the worker ({e}): plan no device run", file=sys.stderr)
+    return out
+
+
+def device_runs(ready, working, room, paused, online):
+    """The worker runs that the pacer starts now, 0 or 1 (hub #13): one while a `lane:device` ticket is ready, no
+    worker run works or starts (`working`: its claims and its pending starts), the target has room for one Opus
+    run (a worker run uses the same Claude quota as a cloud Opus run) and the worker is online. `online` is a
+    function: it reads the heartbeat only when the other conditions hold. With the worker offline, a started job
+    would wait in the queue of GitHub."""
+    return int(bool(ready > 0 and not working and room >= 1 and not paused and online()))
+
+
 def plan(target, claims, ready, lanes, paused, hi=MAX_FIRE, refill=REFILL, refill_lane=None):
     """(K, {lane: runs}): the runs that the pacer starts now and the runs of each lane among them (#1715, #1727).
     lanes: [(name, ready tickets of the lane, weight)] in the order of their start. The target and the claims are in Opus
@@ -525,10 +570,13 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
     open_all = dashboard.pages("issues?state=open")
     paused = any({dashboard.STATUS, dashboard.PAUSED} <= set(dashboard.labels(i)) for i in open_all)
     ready = len(dashboard.candidates(open_all, reserved=()))   # all lanes: lane_plan splits them
+    ready_device = len(dashboard.candidates(open_all, lane=DEVICE)) if DEVICE in dashboard.RESERVED else 0
+    ready -= ready_device                               # no cloud run takes a device ticket: only a worker run
     t = datetime.datetime.now(datetime.timezone.utc)
     refs = health.claim_refs()
     lanes = None if refs is None else health.count_lanes(refs, t, account=account)
     claims = health.active_claims(t) if lanes is None else sum(lanes.values())
+    claim_lanes = lanes
     if out is not None:
         out.update(open=open_all, refs=refs, claims=claims, lanes=lanes)
     weights, source = health.lane_weights(comments)
@@ -553,14 +601,22 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
     extra = wait.get(refill_lane or "main", 0) - next((c for n, c, _ in lanes if n == refill_lane), 0) if refill_lane else 0
     refill = max(0, refill - max(0, extra))             # a pending run beyond the ready tickets of its lane refills
     lanes = [(n, max(0, c - wait.get(n, 0)), w) for n, c, w in lanes]
-    k, runs = plan(target, eq, max(0, ready - sum(wait.values())), lanes, paused, refill=refill, refill_lane=refill_lane)
     cap, flow = read_flow(now)
+    device = 0
+    if DEVICE in dashboard.RESERVED and DEVICE not in weights and DEVICE not in skip and cap is None:
+        working = (claim_lanes or {}).get(DEVICE, 0) + wait.get(DEVICE, 0)
+        device = device_runs(ready_device, working, target - eq, paused, lambda: worker_online(read_heartbeats(), now))
+    k, runs = plan(target, eq + device, max(0, ready - sum(n for t, n in wait.items() if t != DEVICE)), lanes, paused,
+                   refill=refill, refill_lane=refill_lane)
     if out is not None:
         out["flow"], out["flow_reason"] = cap, flow
     if cap is not None:                                     # the flow is the bottleneck: Opus runs repair the PRs
         k, runs = min(k, cap), dict.fromkeys(runs, 0)
+    if DEVICE in dashboard.RESERVED and DEVICE not in weights:   # the worker run: in K and in the plan, with no weight
+        k, runs = k + device, {**runs, DEVICE: device}
     line = (f"{describe(usage, now, burn, burn7)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
             + (f"pending {json.dumps(wait)} · " if wait else "")
+            + (f"device {device} (ready {ready_device}) · " if ready_device else "")
             + f"refill {refill} ({need or f'ready {ready}, target {target}: no refill source or a refill lock < {REFILL_GAP} min'}) · "
             f"paused {paused} · {flow} · max_fire {MAX_FIRE} · weights "
             + ", ".join(f"{n} {w:.2f} ({source[n]})" for n, w in weights.items()) + note)
