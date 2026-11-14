@@ -11,24 +11,34 @@ pacer that this run is cheap, #1727). Pick only from its section `Candidates`, s
 process review, and stop when no `lane:haiku` ticket is ready. Do one ticket per run: stop after its report,
 also with the argument `max` (a Haiku call costs 5 times more above 100k prompt tokens, and the Haiku runs
 reached 91k to 200k; the pacer starts a fresh run with a 65k context for the next ticket, 2026-10-28). A ticket that is not as clear as its label says: release
-the claim, remove `lane:haiku`, comment why in one line, and take the next one. Write the report with `framework/tools/report.py` (`report.md`): it adds `· lane haiku` from the git config (#1982).
+the claim, change its label `lane:haiku` to `lane:sonnet`, comment why in one line, and take the next one. Write the report with `framework/tools/report.py` (`report.md`): it adds `· lane haiku` from the git config (#1982).
 
-## Deep lane (step 5)
+## Sonnet lane (step 5)
 
-The main runs work at low effort (owner, 2026-10-28). The scheduled task "fleet autopilot deep" runs at high
-effort for the work where the thinking matters more than the typing (`ticket` skill, "Model lanes"). When the argument
-names `lane deep`, run `python3 framework/tools/cycle_start.py --lane deep` first: it sets `git config fleet.lane deep` (the
-claims and the report then name the lane). Pick from its section `Candidates`. A deep run does the epic check and the queue refill of step 5, the roadmap
-review and the process review: while `reserved` in `[pacing]` of `steering/system/system.toml` names `deep`, `claim.py` gives those
-locks (`--review`, `--roadmap`, `--refill`) only to deep runs, and the other runs skip them. Stop when no `lane:deep`
-ticket is ready and the refill is done, or at 120k context (`more.md`): the main runs take the other tickets for less.
+When the argument names `lane sonnet`, do as a Haiku run does, with `--lane sonnet` and the `lane:sonnet` tickets: one
+ticket per run, and no epic check, queue refill, roadmap review or process review. A ticket that is not as clear as
+its label says: release the claim, remove `lane:sonnet` (the Opus runs then take it), comment why in one line, and take
+the next one.
+
+## Fable lane and the duty lane (step 5)
+
+The name of a lane is its model (owner, 2026-11-14). Each run has the default effort of the platform, and the Fable
+runs do the tickets where a wrong answer costs the most (`ticket` skill, "Model lanes"). When the argument names
+`lane fable`, run `python3 framework/tools/cycle_start.py --lane fable` first: it sets `git config fleet.lane fable` (the
+claims and the report then name the lane). Pick from its section `Candidates`. Stop when no `lane:fable` ticket is
+ready, or at 120k context (`more.md`): the other runs take the other tickets for less.
+
+The duty lane does the epic check and the queue refill of step 5, the roadmap review and the process review. It is
+`duty` in `[pacing]` of `steering/system/system.toml`. With `duty = "opus"`, the runs of the default lane (no lane in
+the argument) do this work, and the runs of a lane with a label skip it. While `reserved` names the duty lane, only
+its runs do this work. `claim.py` gives the locks (`--review`, `--roadmap`, `--refill`) only to a run of the duty lane.
 
 ## Large tickets (step 4)
 
 If the size is L, split it into S or M sub-issues with the `ticket` skill. Give the parent label `epic`.
 If the top candidate of step 5 has `size:L`, split it now (`ticket` skill), then pick again.
-While `reserved` in `agent.toml` names `deep`, only a deep run splits (`claim.py E --refill` exits 1 in the other
-runs): give the ticket `lane:deep` and pick the next one.
+Only a run of the duty lane splits (`claim.py E --refill` exits 1 in the other runs): a run of another lane picks the
+next ticket. An L ticket has no lane label: remove one, so that the duty lane takes the ticket.
 
 ## Epics and refill (step 5)
 

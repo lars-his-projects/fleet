@@ -38,12 +38,12 @@ def record(k, plan=None, ago=60, **more):
 
 
 def test_a_plan_becomes_starts_with_the_lane_runs_first():
-    got, skipped = starts.plan_starts(fleet(("alpha",)).projects, {"alpha": record(3, {"haiku": 1, "deep": 1})}, NOW)
-    assert [s["lane"] for s in got] == ["deep", "haiku", "main"] and skipped == []
-    assert got[0] == {"project": "alpha", "lane": "deep", "source_url": "https://github.com/g/alpha",
-                      "prompt": "/scheduled max lane deep", "title": "alpha run (deep)",
-                      "tags": ["fleet-run", "project:alpha", "lane:deep"]}
-    assert got[2]["prompt"] == "/scheduled max"
+    got, skipped = starts.plan_starts(fleet(("alpha",)).projects, {"alpha": record(5, {"haiku": 1, "sonnet": 1, "fable": 1})}, NOW)
+    assert [s["lane"] for s in got] == ["fable", "sonnet", "haiku", "opus"] and len(skipped) == 1
+    assert got[0] == {"project": "alpha", "lane": "fable", "source_url": "https://github.com/g/alpha",
+                      "prompt": "/scheduled max lane fable", "title": "alpha run (fable)",
+                      "tags": ["fleet-run", "project:alpha", "lane:fable"]}
+    assert got[3]["prompt"] == "/scheduled max"
 
 
 def test_only_a_fresh_plan_of_a_project_that_the_starter_serves_starts_a_run():
@@ -77,7 +77,7 @@ def test_the_limits_hold_for_a_wrong_plan_and_each_project_gets_a_turn():
     got, skipped = starts.plan_starts(projects, {n: record(4) for n in ("alpha", "beta", "gamma")}, NOW)
     assert len(got) == starts.LIMIT_TICK and [s["project"] for s in got[:3]] == ["alpha", "beta", "gamma"]
     assert {"project": "*", "why": "4 runs above the limit of a tick"} in skipped
-    assert starts.plan_starts(projects[:1], {"alpha": record(3, {"night": 2})}, NOW)[0][0]["lane"] == "main"   # an unknown lane gets no start
+    assert starts.plan_starts(projects[:1], {"alpha": record(3, {"night": 2})}, NOW)[0][0]["lane"] == "opus"   # an unknown lane gets no start
 
 
 def test_newest_takes_the_record_with_the_newest_time():
@@ -90,7 +90,7 @@ def test_the_command_prints_one_json_line(tmp_path, capsys):
     records = {"alpha": {"at": at(), "k": 1, "plan": {}}, "beta": record(2, {"haiku": 1}), "gamma": record(1)}
     code = starts.main(["--config", str(tmp_path / "fleet.toml")], read=lambda p: records[p.name], now=NOW)
     out = json.loads(capsys.readouterr().out)
-    assert code == 0 and [(s["project"], s["lane"]) for s in out["starts"]] == [("beta", "haiku"), ("beta", "main")]
+    assert code == 0 and [(s["project"], s["lane"]) for s in out["starts"]] == [("beta", "haiku"), ("beta", "opus")]
     assert {s["project"] for s in out["skipped"]} == {"alpha", "gamma"} and out["at"] == at(0)
 
 

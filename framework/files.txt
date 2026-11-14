@@ -93,6 +93,7 @@ framework/tests/test_claim_revived.py
 framework/tests/test_claim_takeover.py
 framework/tests/test_dashboard.py
 framework/tests/test_deep_lane.py
+framework/tests/test_model_lanes.py
 framework/tests/test_dashboard_claimed.py
 framework/tests/test_dashboard_decide.py
 framework/tests/test_dashboard_fresh.py

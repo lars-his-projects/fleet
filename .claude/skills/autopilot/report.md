@@ -40,7 +40,7 @@ and put its findings on the ticket (a comment, new bug tickets, `Depends on`) an
 8 of 18 given-back runs were such checks); `none` only when the run stopped without a PR and the ticket stays open.
 Before you give back a ticket whose next step only the owner can do, add `needs-human` (`owner.md`): with `none` and
 a release only, the next run takes it again in minutes (#5676: 2 runs). Before you give back a ticket because your fix
-failed or you found no cause, add `lane:deep` (`ticket` skill, "Model lanes"): two main runs gave #5736 back with a
+failed or you found no cause, add `lane:fable` (`ticket` skill, "Model lanes"): two main runs gave #5736 back with a
 failed fix (#5937). A hand-off at the context limit with a known fix on a branch keeps its lane. `framework/tools/health.py` counts the `pr #n` lines by the present PR state (#902).
 `framework/tools/report.py` puts the output of `python3 tools/release.py` (the release bar of each goal, #879) above the
 `Usage:` line, when the project has that tool (#1963).

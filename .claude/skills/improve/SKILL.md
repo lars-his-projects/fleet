@@ -109,7 +109,7 @@ case. Make one epic for a large set (`ticket` skill), with all places as sub-iss
 **Each lever is a ticket on the board** (owner, 2026-10-27). First list the open process tickets
 (`/issues?state=open&labels=process`). When one names the lever, claim it (`framework/tools/claim.py N`) and do it, or, when
 another run owns it, go to the next lever. Else make `Process: <lever>` (`ticket` skill, labels `process`, `tooling`,
-`P1`, `lane:deep` when it needs judgement): the evidence, the before-numbers, the cause or the question for new data.
+`P1`, `lane:fable` when it needs judgement): the evidence, the before-numbers, the cause or the question for new data.
 
 **Size:**
 - Small (a skill text, a setting, a workflow step, a tool option, a new check): do it in this review, one PR per

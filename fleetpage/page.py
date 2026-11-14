@@ -11,7 +11,7 @@ from fleetpage.model import LIMIT, ts
 E = html.escape
 HUES = 8                        # the project colors --p0 ... --p7; a later project gets the neutral color
 KIND_NAMES = {"decision": "Decision", "check": "Check", "epic": "Epic", "bug": "Bug", "question": "Question"}
-LANE_NAMES = {"haiku": "Haiku", "main": "Main", "deep": "Deep"}
+LANE_NAMES = {"haiku": "Haiku", "sonnet": "Sonnet", "opus": "Opus", "fable": "Fable", "deep": "Deep (old lane)"}
 W, H, L, R, T, B = 320, 200, 30, 8, 10, 24          # the weekly curve: size and margins of the drawing
 PW, PH = W - L - R, H - T - B
 

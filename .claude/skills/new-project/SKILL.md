@@ -153,13 +153,14 @@ selects "Use it".
      feature in the first goal of the roadmap that makes it work. Else delete `.claude/skills/try/`.
    - `.claude/skills/roadmap/SKILL.md`: keep it. The runs make the epics with it.
 3. Remove what the project does not need:
-   - `weights` in `[pacing]` of `steering/system/system.toml`, from the "Runs" answer: `{}` (one main task),
-     `{ haiku = 0.25 }`, or `{ haiku = 0.25, deep = 4.0 }` with `reserved = ["haiku", "deep"]`. Each lane is a
-     scheduled task and two secrets more for the owner.
+   - `weights`, `reserved` and `duty` in `[pacing]` of `steering/system/system.toml`: keep the lanes of the template
+     (`haiku`, `sonnet`, `fable`, and the default lane Opus) when the starter session of the hub starts the runs:
+     a lane costs the owner nothing there. With scheduled tasks (the "Runs" answer): `{}` (one main task) or
+     `{ haiku = 0.25 }`; each lane is a scheduled task and two secrets more for the owner.
    - `.claude/skills/new-project/`: delete it, unless the owner wants to make more projects from the new one.
-   - `.claude/settings.json`: when the starter session of the hub starts the runs (`starts = "session"`, the
-     default of the template), add `"effortLevel": "low"`: the starter cannot select the effort of a run
-     (`docs/STARTER.md` of the hub).
+   - The effort of a run: the starter session of the hub cannot select it, and a line `effortLevel` in
+     `.claude/settings.json` did not change it (the owner saw the effort medium in each run of street-quiz,
+     2026-11-14). The lanes differ by their model only (`docs/STARTER.md` of the hub).
    - `.claude/settings.json`: add `allow` rules for the commands of the stack (for example `Bash(npm:*)`,
      `Bash(cargo:*)`). Remove nothing from `deny`.
    - The list "Write these specific files" that the bootstrap printed names the specific files of the source project.

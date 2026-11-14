@@ -25,7 +25,9 @@ from fleetpage import sources
 from hub import registry
 
 UTC = datetime.timezone.utc
-LANES = ("deep", "haiku", "main")   # the lanes that the starter knows, in the sequence of the starts
+LANES = ("fable", "sonnet", "haiku", "opus")   # the lanes that the starter knows, in the sequence of the starts.
+#                                             The name of a lane is its model (owner, 2026-11-14)
+DEFAULT = "opus"                    # the lane of the runs that a plan gives no lane: the tickets with no lane label
 LIMIT_PROJECT = 4                   # the most starts for one project in one tick
 LIMIT_TICK = 8                      # the most starts in one tick
 STALE = 20 * 60                     # seconds: an older plan starts no run (the pacer writes one each 10 minutes)
@@ -34,7 +36,7 @@ SESSION = "session"                 # the value of `starts` in a record of a pro
 
 def prompt(lane):
     """The first message of a run: the same text as the scheduled task of the lane had."""
-    return "/scheduled max" if lane == "main" else f"/scheduled max lane {lane}"
+    return "/scheduled max" if lane == DEFAULT else f"/scheduled max lane {lane}"
 
 
 def start(project, lane, test=False):
@@ -60,8 +62,8 @@ def lanes_of(record):
         return None
     if any(isinstance(n, bool) or not isinstance(n, int) or n < 0 for n in plan.values()):
         return None
-    out = [lane for lane in LANES if lane != "main" for _ in range(plan.get(lane, 0))]
-    return out + ["main"] * max(0, k - sum(plan.values()))
+    out = [lane for lane in LANES if lane != DEFAULT for _ in range(plan.get(lane, 0))]
+    return out + [DEFAULT] * max(0, k - sum(plan.values()))
 
 
 def plan_starts(projects, records, now, limit_project=LIMIT_PROJECT, limit_tick=LIMIT_TICK, stale=STALE):

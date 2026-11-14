@@ -54,7 +54,7 @@ def test_project_runs_count_prs_usage_lanes_and_the_hours_of_a_session_one_time(
     week = runs["weeks"][0]
     assert (week["reports"], week["prs"], week["usd"]) == (3, 2, 2.5)
     assert round(week["hours"], 6) == 0.3       # s1: its largest wall value (12 minutes); s2: 6 minutes
-    assert runs["lanes"]["main"] == {"reports": 2, "prs": 2, "usd": 2.0, "nopr_usd": 0.0}
+    assert runs["lanes"]["opus"] == {"reports": 2, "prs": 2, "usd": 2.0, "nopr_usd": 0.0}
     assert runs["lanes"]["haiku"]["nopr_usd"] == 0.5 and runs["lanes"]["deep"]["prs"] == 2
     assert (runs["reports_24h"], runs["prs_7d"], runs["last_report"]) == (3, 2, "2026-11-13T11:00:00Z")
 
@@ -98,5 +98,5 @@ def test_build_joins_the_projects_and_keeps_a_failed_read_visible():
     assert m["totals"] == {"done": 1, "total": 2, "waiting": 1, "ready": 3, "claims": 2, "prs_7d": 2, "usd_7d": 4.0}
     week = m["weeks"][-1]
     assert week["current"] and week["usd"] == 4.0 and set(week["split"]) == {"alpha", "beta"}
-    assert [lane["lane"] for lane in m["lanes"]] == ["haiku", "main"]
+    assert [lane["lane"] for lane in m["lanes"]] == ["haiku", "opus"]
     assert beta["errors"] and m["quota"]["seven_day"]["used"] == 0.07

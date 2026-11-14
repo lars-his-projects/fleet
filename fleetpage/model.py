@@ -102,9 +102,9 @@ def report_stats(report):
     tickets = report.get("tickets") or []
     prs = sum(1 for t in tickets if str(t.get("result", "")).startswith("pr #"))
     usd = float((report.get("tokens") or {}).get("usd") or 0)
-    lane = report.get("lane") or "main"
+    lane = report.get("lane") or "opus"       # a run of the default lane: the name of a lane is its model
     wall = WALL.search(report.get("body") or "")
-    return prs, usd, "main" if lane == "opus" else lane, float(wall.group(1)) if wall else 0.0, report.get("session") or ""
+    return prs, usd, "opus" if lane == "main" else lane, float(wall.group(1)) if wall else 0.0, report.get("session") or ""
 
 
 def project_runs(reports, weeks, now):
@@ -268,7 +268,7 @@ def build(fleet, loaded, now):
             "pacer": pacer_state(d.get("pacer") or [], weeks, now),
             "last_report": runs["last_report"], "reports_24h": runs["reports_24h"], "prs_7d": runs["prs_7d"],
             "usd_7d": round(runs["usd_7d"], 2), "errors": list(d.get("errors") or [])})
-    order = {"haiku": 0, "main": 1, "deep": 2}
+    order = {"haiku": 0, "sonnet": 1, "opus": 2, "fable": 3, "deep": 4}     # `deep`: the reports before 2026-11-14
     quota = quota_now(all_pacer, now)
     return {
         "generated": iso(now),

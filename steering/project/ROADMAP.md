@@ -49,6 +49,8 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
     4 quality work with evidence; 5 experiments of the lab; 6 prototypes of a proposed direction on a preview branch
   - A prototype does not merge to `main` before the owner approves the direction
 - [ ] `pacer:lanes` A lane router: each kind of ticket goes to the cheapest lane whose rework stays below a limit
+  - Done on 2026-11-14: the lanes have the names of their models (`haiku`, `sonnet`, `opus`, `fable`), and the starter
+    starts each lane with its model. The weights of Sonnet and Fable are start values: measure them
   - A limit for the share of the deep lane (52 % of the usage on 2026-11-13)
 - [ ] `pacer:value` (larger idea) The next point of quota goes to the work with the best measured value
   - While the owner gives feedback, those tickets get a fast lane: the fix is on the preview before the owner stops
@@ -92,8 +94,8 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
     made this way is street-quiz (card 7): the owner gave one card answer and one click
   - Open: the owner still makes the empty repository with one click; a workflow with a token that the owner
     approves for each use can do it
-  - Open: a run that the starter started does a ticket and merges a PR; then the four older projects move from
-    their scheduled tasks to the starter
+  - Done on 2026-11-14: the starter runs of street-quiz did tickets and merged five PRs, and the four older projects
+    moved from their scheduled tasks to the starter
   - Open: the form "New project" starts the steps by itself; on 2026-11-14 a session did them from a card
   - Open: the share of the week of each project comes from `fleet.toml`; on 2026-11-14 it is a fixed value in each
     project, so a new project makes the sum larger than 1

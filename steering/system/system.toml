@@ -9,13 +9,15 @@ week_free = 0.0                 # below this 7-day usage the runs fill each 5-ho
 week_guard = true               # true: the 7-day usage limits the runs; false: only the 5-hour window counts
 week_share = 0.375              # the part of the weekly budget of the account that this project plans with (its weight in fleet.toml of the hub: 3 of 8)
 week_reserve = 0.10             # the part of the week that the runs leave to the sessions of the owner, until 12 hours before the weekly reset
-weights = { haiku = 0.25, deep = 4.0 }   # a lane run in Opus runs (start value); deep: high effort
-reserved = ["haiku", "deep"]    # lanes whose tickets Opus runs never take; with deep, only deep runs do the reviews and the refill
+weights = { haiku = 0.25, sonnet = 0.5, fable = 2.5 }   # a lane run in Opus runs: Haiku is measured; Sonnet and Fable are start values from the list prices (2026-11-14)
+reserved = ["haiku", "sonnet", "fable"]    # lanes whose tickets the Opus runs never take. The name of a lane is its model (owner, 2026-11-14)
+duty = "opus"                   # the lane of the epic check, the queue refill and the reviews. `opus` is the default lane (no lane label);
+                                # a reserved lane here (`fable`) gives this work to the runs of that lane only
 # On since 2026-11-13: the owner finished the account steps (the secrets and the scheduled tasks, card 3).
 pacer = "workflow"              # pacer.yml plans the runs each 10 minutes (framework/tools/pacer.py); another value stops its loop
-# starts = "session"            # off until the starter session is proved (docs/STARTER.md, decision A2 of card 6): the starter
-                                # would start the planned runs; with no `starts` line, pacer.yml starts them with the API
-                                # triggers of the scheduled tasks, as before
+starts = "session"              # the starter session starts the planned runs (docs/STARTER.md): the hub needs no scheduled task
+                                # and no secret. With no `starts` line, pacer.yml starts them with the API triggers of the
+                                # scheduled tasks, as before 2026-11-14
 trigger = "trig_01U5nL2JcLJ4ueit4xCkH6dT"   # the ID of the scheduled task "fleet autopilot": framework/docs/OPERATOR.md, section 3
 
 [review]                        # the process review (`improve` skill): merged PRs, never hours
