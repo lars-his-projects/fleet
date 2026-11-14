@@ -77,14 +77,15 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
     minutes, and for a step card the reason and the tries), assigns a complete card and sends an incomplete card back
   - Done on 2026-11-14: a comment of the owner of a card takes the label and the assignee off (`cards.yml`)
   - Open: the default of a decision card, and the labels `decision`, `step` and `proposal` in each project
-- [ ] `workers:polopc` polopc is a worker: a user `agent`, containers, a worker service that asks for work
+- [x] `workers:polopc` polopc is a worker: a user `agent`, containers, a worker service that asks for work
   - The environment of a project is a container file in git; an agent changes it by a PR
   - One bootstrap command for the owner
   - Done on 2026-11-14: the kit `deploy/worker/`. The worker is a GitHub Actions runner in a container with a
     browser, with no host folder, no Docker socket and no root. `install.sh` is the one command, and watchtower
     brings each new image. The workflow `worker-check` proves the worker
-  - Open: the owner does the steps of `deploy/worker/README.md` one time (a token, two settings, one command)
-  - Open: a phone emulator on the worker (the Android SDK in the volume `tools`), and the GPU
+  - Done on 2026-11-14: the owner started the worker (card 12), and the run worker-check 1 is green on the runner
+    `polopc`: the tools are there and Chromium loads a page
+  - Later, with `workers:devices`: a phone emulator on the worker (the Android SDK in the volume `tools`), and the GPU
 - [ ] `setup:preview-operator` One compose stack that the owner starts one time on the server
   - Input: the server configuration is in the private repository `lars-his-projects/server-config`; today the owner
     pulls it on the server by hand
