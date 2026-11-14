@@ -21,7 +21,7 @@ from hub import registry
 
 def load_project(project, token, metrics_dir=None, offline=False, issues=None, roadmaps=None):
     """The loaded data of one project for `model.build()`. Each read that fails adds one line to `errors`."""
-    data = {"pacer": [], "reports": [], "roadmap": None, "waiting": None, "working": None, "errors": []}
+    data = {"pacer": [], "reports": [], "roadmap": None, "waiting": None, "working": None, "claims": {}, "errors": []}
     with tempfile.TemporaryDirectory() as tmp:
         try:
             folder = metrics_dir or (None if offline else sources.clone_metrics(project.repo, pathlib.Path(tmp) / "metrics"))
@@ -49,6 +49,11 @@ def load_project(project, token, metrics_dir=None, offline=False, issues=None, r
             data["working"] = sources.fetch_working(project.repo, token)
         except sources.SourceError as e:
             data["errors"].append(f"working: {e}")
+        try:
+            data["claims"] = sources.fetch_claims(project.repo, [i["number"] for i in data["working"] or []], token)
+        except (sources.SourceError, ValueError) as e:
+            data["claims"] = None
+            data["errors"].append(f"claims: {e}")
     return data
 
 
