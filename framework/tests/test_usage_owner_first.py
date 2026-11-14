@@ -4,9 +4,10 @@ refill run for the roadmap. The owner answered 8 tickets of a paced project and 
 (the hub, the same day)."""
 import dashboard
 import feedback
+import health
 import usage
-from test_pacer_device import NOW, fire, world  # noqa: F401 (world is a fixture)
 
+NOW = 1_800_000_000
 H = 3600
 FIVE = {"five_hour": (0.3, NOW + 2 * H, "allowed")}
 AHEAD = FIVE | {"seven_day": (0.52, NOW + 145 * H, "allowed")}          # 52 % used after 23 of 168 hours
@@ -63,10 +64,19 @@ def test_owner_wait_counts_a_comment_with_no_answer_and_an_issue_with_no_label(m
     assert wait() == 0                                                   # a read error: the weekly pace decides
 
 
-def test_the_roadmap_starts_no_refill_run_when_the_setting_is_off(world, monkeypatch):  # noqa: F811
-    world["issues"] = []                                                 # nothing is ready
+def test_the_roadmap_starts_no_refill_run_when_the_setting_is_off(monkeypatch):
+    """A false project with no open issue for `usage.fire`: nothing is ready, and the roadmap has features with no epic."""
+    monkeypatch.setattr(dashboard, "pages", lambda path, limit=10: [])
+    monkeypatch.setattr(dashboard, "api", lambda path, method="GET", data=None, repo=None: {"total_count": 0})
+    monkeypatch.setattr(health, "claim_refs", lambda remote="origin": [])
+    monkeypatch.setattr(health, "lane_weights", lambda comments: ({"haiku": 0.25}, {"haiku": "start"}))
+    monkeypatch.setattr(usage, "due_reviews", lambda **_: [])
+    monkeypatch.setattr(usage, "release_due", lambda: [])
     monkeypatch.setattr(usage, "free_sources", lambda *a, **k: ["3 roadmap features with no epic"])
     monkeypatch.setattr(usage, "refill_runs", lambda issues, now: 1)
+
+    def fire():
+        return usage.fire({"five_hour": (0.2, NOW + 3 * H, "allowed")}, NOW, status=([], ""), target=4)
     monkeypatch.setattr(usage, "ROADMAP_REFILL", True)
     k, _, line = fire()
     assert k == 1 and "3 roadmap features with no epic" in line
