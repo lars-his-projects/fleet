@@ -1,0 +1,102 @@
+name: worker-run
+
+# Runs one agent run of a project on the fleet worker (polopc), with the same guard as a cloud run
+# (deploy/worker/README.md, "A worker run").
+# - The hub starts it with `workflow_dispatch`. A project calls it as a reusable workflow from its own
+#   `workflow_dispatch` workflow: then the token of the job is the token of the project, and the run needs no
+#   other secret.
+# - Never add a pull request trigger: a workflow of a fork must not run on polopc (tests/test_fleet_worker_kit.py).
+# - Never add a mode or a flag that skips the permission checks (tests/test_fleet_worker_run.py).
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: The prompt of the run
+        required: true
+        default: /scheduled max lane device
+  workflow_call:
+    inputs:
+      prompt:
+        description: The prompt of the run
+        required: true
+        type: string
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN:
+        required: true
+
+permissions:
+  contents: write        # the branch of the ticket, the claim refs
+  issues: write          # labels and comments
+  pull-requests: write   # the PR of the ticket
+  actions: write         # start ci.yml on the branch of the PR: a push with the token of the job starts no workflow
+
+jobs:
+  run:
+    # A caller with another event (a pull request, a comment) gets no job on polopc.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, polopc]
+    timeout-minutes: 180
+    concurrency:
+      group: worker-run-${{ github.repository }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check that the CLI has the permission mode with a guard
+        run: |
+          claude --version
+          help="$(claude --help)"
+          for word in '"auto"' '--permission-prompts'; do
+            if ! grep -qF -- "$word" <<<"$help"; then
+              echo "claude --help does not name $word: read the options (worker-check) and change worker-run.yml" >&2
+              exit 1
+            fi
+          done
+      - name: Install the packages of the project
+        # The system Python refuses pip, and a job has no root: the packages go into a virtual environment.
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+          export PATH="$RUNNER_TEMP/venv/bin:$PATH"
+          install=""
+          if [ -f agent.toml ]; then
+            install="$(python3 -c 'import tomllib; print(tomllib.load(open("agent.toml", "rb")).get("commands", {}).get("install", ""))')"
+          fi
+          if [ -n "$install" ]; then bash -c "$install"; fi
+      - name: Set the name of the commits
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Run the agent
+        # --permission-mode auto: the guard of a cloud run. The deny list and the hooks of .claude/settings.json apply.
+        # --permission-prompts none: no person is there, so a call that needs an answer is denied.
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PROMPT: ${{ inputs.prompt }}
+        run: |
+          set +e
+          claude -p "$PROMPT" --permission-mode auto --permission-prompts none --output-format json \
+            > "$RUNNER_TEMP/result.json"
+          code=$?
+          set -e
+          if ! jq -e . "$RUNNER_TEMP/result.json" > /dev/null 2>&1; then
+            echo "the CLI gave no JSON result (exit $code):" >&2
+            head -c 4000 "$RUNNER_TEMP/result.json" >&2
+            exit 1
+          fi
+          {
+            echo "## The last message of the run"
+            echo
+            jq -r '.result // "(no text)"' "$RUNNER_TEMP/result.json"
+            echo
+            echo "## Denied tool calls"
+            echo
+            jq -r '(.permission_denials // []) | if length == 0 then "none" else .[] | "- \(.tool_name): \(.tool_input | tostring | .[0:300])" end' "$RUNNER_TEMP/result.json"
+            echo
+            jq -r '"turns \(.num_turns // "?") · minutes \(((.duration_ms // 0) / 60000) | floor) · error \(.is_error // false) · exit '"$code"'"' "$RUNNER_TEMP/result.json"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$code" -ne 0 ] || [ "$(jq -r '.is_error // false' "$RUNNER_TEMP/result.json")" = "true" ]; then
+            exit 1
+          fi

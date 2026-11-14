@@ -12,7 +12,8 @@ Steps: `git commit -F MSG.txt` of the staged files (without `--message`: the com
 the tests (the test files of the branch and the test files that import its changed modules, never the full
 suite: the quick CI runs it, owner #4187; `--tested`: you ran them on this tree), `claim.py N --guard` and the push (`merge_main.push`), the PR (a new
 one with `Closes #N` in its body; or the open PR of the branch), and `mergeable_state` (`dirty`: run
-`python3 framework/tools/merge_main.py --push N`). Then it waits for the quick CI of the pushed commit, up to `WAIT`
+`python3 framework/tools/merge_main.py --push N`). In a job of GitHub Actions (a worker run) it starts `ci.yml` on the
+branch: the push of a job starts no workflow. Then it waits for the quick CI of the pushed commit, up to `WAIT`
 minutes after its start (#4784): a red quick CI after the end of its run cost a takeover and a cold run 30 to 40
 minutes later (11 to 25 of 50 takeovers on 2026-10-30); the run that wrote the code fixes it with its warm context.
 Run it with the Bash `timeout` 600000. Exit 0: shipped (the quick CI is green, still runs at the time limit: `--ci`
@@ -137,6 +138,24 @@ def closer(text, number, part=False):
         if any(part or int(m.group(1)) != number for m in CLOSER.finditer(line)):
             return line.strip()
     return None
+
+
+def start_ci(branch, env=None):
+    """Start `ci.yml` on `branch` when the push came from a job of GitHub Actions (a worker run, hub #20): a push and
+    a PR with the token of a job start no `pull_request` workflow, but a dispatch with that token starts one, and
+    Automerge reads a CI run of `workflow_dispatch` too. The job needs the permission `actions: write`."""
+    env = os.environ if env is None else env
+    if env.get("GITHUB_ACTIONS") != "true":
+        return False
+    try:
+        dashboard.api("actions/workflows/ci.yml/dispatches", "POST", {"ref": branch})
+    except ValueError:                                  # the answer 204 has no body
+        pass
+    except Exception as e:
+        print(f"no CI started on {branch} ({e}): the push of a job starts none; start ci.yml on the branch (`github.md`)")
+        return False
+    print(f"started ci.yml on {branch}: a push with the token of a job starts no workflow")
+    return True
 
 
 def state(number, tries=6, wait=5):
@@ -307,6 +326,7 @@ def main(argv=None):
     if a.hold:                                  # at once: the quick CI of the PR must not merge it first
         dashboard.api(f"issues/{pr['number']}/labels", "POST", {"labels": ["hold"]})
         print(f"label hold on PR #{pr['number']}")
+    start_ci(branch)
     s = state(pr["number"])
     print(f"mergeable_state {s}" + (f": {conflict(a.number)}" if s == "dirty" else ""))
     if s == "dirty":                                # a conflict: GitHub starts no CI on the PR
