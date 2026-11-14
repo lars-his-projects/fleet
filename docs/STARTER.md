@@ -4,14 +4,16 @@ Decisions A2 and P of card 6 (owner, 2026-11-13 and 2026-11-14). The goal is pri
 setup from the owner. Before, each project needed three scheduled tasks, three API tokens and seven secrets that only
 the owner can make.
 
-## Status on 2026-11-14: in use for each project
+## Status on 2026-11-14: in use for each project but one
 
 - The starter is the repository `lars-his-projects/fleet-starter`, one session with only that repository, and the
   scheduled task "fleet starter" that sends the session one tick each hour.
 - street-quiz was the first project that the starter served. Proved there on 2026-11-14: the starter started runs
   with no person, and those runs did tickets and merged five pull requests.
-- Since 2026-11-14 the starter serves each project of the fleet: aoe2mc, travel-aggregator, tumach-dance and the hub
-  have `starts = "session"` too. Their scheduled tasks stay in the account, but no pacer calls them.
+- Since 2026-11-14 the starter also serves the hub, aoe2mc and tumach-dance (`starts = "session"`; for aoe2mc and
+  tumach-dance from the merge of their pull requests). Their scheduled tasks stay in the account, but no pacer calls
+  them. travel-aggregator keeps its scheduled tasks and its lanes `haiku` and `deep` until its ticket 2869 is done:
+  its tools differ from the hub, and the change did not apply there.
 - The lanes have the names of their models (owner, 2026-11-14): `haiku`, `sonnet`, `opus` and `fable`. The starter
   starts each run with the model of its lane, so a new lane costs the owner nothing.
 

@@ -94,8 +94,9 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
     made this way is street-quiz (card 7): the owner gave one card answer and one click
   - Open: the owner still makes the empty repository with one click; a workflow with a token that the owner
     approves for each use can do it
-  - Done on 2026-11-14: the starter runs of street-quiz did tickets and merged five PRs, and the four older projects
-    moved from their scheduled tasks to the starter
+  - Done on 2026-11-14: the starter runs of street-quiz did tickets and merged five PRs. The hub, aoe2mc and
+    tumach-dance moved from their scheduled tasks to the starter
+  - Open: travel-aggregator moves with its ticket 2869 (its tools differ from the hub)
   - Open: the form "New project" starts the steps by itself; on 2026-11-14 a session did them from a card
   - Open: the share of the week of each project comes from `fleet.toml`; on 2026-11-14 it is a fixed value in each
     project, so a new project makes the sum larger than 1
