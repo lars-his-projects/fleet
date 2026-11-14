@@ -447,6 +447,17 @@ def cost(m):
             "a repair or a cycle with no ticket. Not all of this is waste. It is the first place to look.</p></div>")
 
 
+def workers(m):
+    if not m.get("workers"):
+        return "<p>Worker: no heartbeat.</p>"
+    lines = []
+    for w in m["workers"]:
+        when = ts(w["last"])
+        state = "online" if w["online"] else "offline"
+        lines.append(f'<li><b>{E(w["name"])}</b>: {state}, last job {E(stamp(when))} ({E(ago(w["minutes"]))} ago)</li>')
+    return "<ul>" + "".join(lines) + "</ul>"
+
+
 def render(m):
     """The page as one HTML document."""
     now = ts(m["generated"])
@@ -461,7 +472,8 @@ def render(m):
   {alerts(m)}
 </header>
 <section id="now"><div class="sec"><h2>Now</h2></div>{now_table(m, now)}
-  <h3>Runs at work</h3>{working(m)}</section>
+  <h3>Runs at work</h3>{working(m)}
+  <h3>Worker</h3>{workers(m)}</section>
 <section id="inbox"><div class="sec"><h2>Inbox</h2></div>
   <p class="lead">Each open ticket with the label <code>needs-human</code>. The attention budget is {budget} minutes per week. The tickets do not have a price in minutes yet.</p>
   {inbox(m)}</section>

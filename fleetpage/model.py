@@ -14,6 +14,7 @@ from hub import budget
 UTC = datetime.timezone.utc
 WEEK = 7 * 24 * 3600        # seconds of one quota week
 BUCKET = 2                  # hours of one point of the weekly curve
+HEARTBEAT = 30            # minutes between two heartbeats of a worker (`worker-heartbeat.yml`)
 LIMIT = 0.98                # the 7-day usage from which the runs stop
 KINDS = ("decision", "check", "epic", "bug", "question")   # the order of the inbox
 
@@ -222,6 +223,28 @@ def working(issues, repo, now):
     return sorted(rows, key=lambda r: r["number"] or 0)
 
 
+def worker_state(records, now):
+    """One row per worker from its heartbeat records: the newest valid time wins, a bad record is skipped.
+
+    A worker is online when its newest heartbeat is less than 2 periods old (`HEARTBEAT` minutes each).
+    """
+    newest = {}
+    for r in records:
+        try:
+            name, when = r["worker"], ts(r["time"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        if isinstance(name, str) and name and (name not in newest or when > newest[name][0]):
+            newest[name] = (when, r.get("kvm"))
+    rows = []
+    for name in sorted(newest):
+        when, kvm = newest[name]
+        minutes = max(0.0, (now - when).total_seconds() / 60)
+        rows.append({"name": name, "last": iso(when), "minutes": round(minutes), "online": minutes < 2 * HEARTBEAT,
+                     "kvm": kvm if isinstance(kvm, bool) else None})
+    return rows
+
+
 def fleet_budget(fleet, quota, projects, weeks, now):
     """The advice of the one budget for this cycle (`hub/budget.py`), or None with no quota record.
 
@@ -288,6 +311,7 @@ def build(fleet, loaded, now):
         "fleet": {"owner": fleet.owner, "org": fleet.org, "agent": fleet.agent, "week_reserve": fleet.week_reserve,
                   "attention_minutes": fleet.attention_minutes},
         "quota": quota,
+        "workers": worker_state([r for d in loaded.values() for r in d.get("workers") or []], now),
         "budget": fleet_budget(fleet, quota, projects, weeks, now),
         "weeks": weeks,
         "lanes": [{"lane": lane, **{k: round(v, 2) for k, v in lanes[lane].items()}}

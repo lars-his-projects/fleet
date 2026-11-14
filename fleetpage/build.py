@@ -21,12 +21,13 @@ from hub import registry
 
 def load_project(project, token, metrics_dir=None, offline=False, issues=None, roadmaps=None):
     """The loaded data of one project for `model.build()`. Each read that fails adds one line to `errors`."""
-    data = {"pacer": [], "reports": [], "roadmap": None, "waiting": None, "working": None, "errors": []}
+    data = {"pacer": [], "reports": [], "roadmap": None, "waiting": None, "working": None, "workers": [], "errors": []}
     with tempfile.TemporaryDirectory() as tmp:
         try:
             folder = metrics_dir or (None if offline else sources.clone_metrics(project.repo, pathlib.Path(tmp) / "metrics"))
             if folder:
                 data["pacer"], data["reports"] = sources.read_metrics(folder)
+                data["workers"] = sources.read_workers(folder)
             else:
                 data["errors"].append("the metrics branch was not read (offline)")
         except (sources.SourceError, OSError) as e:
