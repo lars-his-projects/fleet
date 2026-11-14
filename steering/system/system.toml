@@ -12,7 +12,8 @@ week_guard = false              # true: the 7-day usage limits the runs; false: 
 week_share = 0.375              # the part of the weekly budget of the account that this project plans with (its weight in fleet.toml of the hub: 3 of 8)
 week_reserve = 0.10             # the part of the week that the runs leave to the sessions of the owner, until 12 hours before the weekly reset
 weights = { haiku = 0.25, sonnet = 0.5, fable = 2.5 }   # a lane run in Opus runs: Haiku is measured; Sonnet and Fable are start values from the list prices (2026-11-14)
-reserved = ["haiku", "sonnet", "fable"]    # lanes whose tickets the Opus runs never take. The name of a lane is its model (owner, 2026-11-14)
+reserved = ["haiku", "sonnet", "fable", "device"]    # lanes whose tickets the Opus runs never take. The name of a lane is its model (owner, 2026-11-14).
+                                # `device` is no model: it has no weight, so no cloud run and no starter session takes its tickets (#13)
 duty = "opus"                   # the lane of the epic check, the queue refill and the reviews. `opus` is the default lane (no lane label);
                                 # a reserved lane here (`fable`) gives this work to the runs of that lane only
 # On since 2026-11-13: the owner finished the account steps (the secrets and the scheduled tasks, card 3).
