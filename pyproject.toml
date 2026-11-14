@@ -1,5 +1,6 @@
 [tool.ruff]
 line-length = 150
+target-version = "py311"   # tomllib is stdlib: the isort rule then agrees in each ruff version
 
 [tool.ruff.lint]
 select = ["F", "I"]   # pyflakes: undefined names, unused variables and imports; isort: sorted imports
