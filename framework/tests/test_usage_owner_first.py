@@ -64,14 +64,42 @@ def test_owner_wait_counts_a_comment_with_no_answer_and_an_issue_with_no_label(m
     assert wait() == 0                                                   # a read error: the weekly pace decides
 
 
-def test_the_roadmap_starts_no_refill_run_when_the_setting_is_off(monkeypatch):
-    """A false project with no open issue for `usage.fire`: nothing is ready, and the roadmap has features with no epic."""
-    monkeypatch.setattr(dashboard, "pages", lambda path, limit=10: [])
+def project(monkeypatch, issues=()):
+    """A false project for `usage.fire`: the open issues `issues`, no claim, the lane `haiku`."""
+    monkeypatch.setattr(dashboard, "RESERVED", ("haiku",))
+    monkeypatch.setattr(dashboard, "pages", lambda path, limit=10: list(issues) if path.startswith("issues") else [])
     monkeypatch.setattr(dashboard, "api", lambda path, method="GET", data=None, repo=None: {"total_count": 0})
     monkeypatch.setattr(health, "claim_refs", lambda remote="origin": [])
     monkeypatch.setattr(health, "lane_weights", lambda comments: ({"haiku": 0.25}, {"haiku": "start"}))
     monkeypatch.setattr(usage, "due_reviews", lambda **_: [])
     monkeypatch.setattr(usage, "release_due", lambda: [])
+    monkeypatch.setattr(usage, "free_sources", lambda *a, **k: [])
+
+
+def test_the_run_above_the_weekly_pace_is_an_opus_run_also_with_no_ready_ticket(monkeypatch):
+    haiku = {"number": 5, "title": "Ticket 5", "body": "", "created_at": "2020-01-01T00:00:00Z",
+             "labels": [{"name": "P1"}, {"name": "lane:haiku"}]}
+    waits = {"owner": 1}
+    # the week gives no run; the work of an owner gives the runs of `owner`
+    monkeypatch.setattr(usage, "target_runs", lambda u, now, burn=0, burn7=None, owner=0, **k: owner() if callable(owner) else owner)
+    monkeypatch.setattr(usage, "owner_wait", lambda: waits["owner"])
+    five = {"five_hour": (0.2, NOW + 3 * H, "allowed")}
+    project(monkeypatch)                                                 # nothing is ready
+    k, runs, line = usage.fire(five, NOW, status=([], ""))
+    assert (k, runs["haiku"]) == (1, 0) and "owner first" in line
+    project(monkeypatch, [haiku])                                        # a ticket of a lane is ready: still an Opus run
+    k, runs, _ = usage.fire(five, NOW, status=([], ""))
+    assert (k, runs["haiku"]) == (1, 0)
+    k, runs, _ = usage.fire(five, NOW, status=([], ""), started={"main": 1})   # the run of the cycle before has no claim yet
+    assert k == 0
+    waits["owner"] = 0                                                   # no work of an owner: the week decides
+    k, runs, line = usage.fire(five, NOW, status=([], ""))
+    assert (k, runs["haiku"]) == (0, 0) and "owner first" not in line
+
+
+def test_the_roadmap_starts_no_refill_run_when_the_setting_is_off(monkeypatch):
+    """Nothing is ready, and the roadmap has features with no epic."""
+    project(monkeypatch)
     monkeypatch.setattr(usage, "free_sources", lambda *a, **k: ["3 roadmap features with no epic"])
     monkeypatch.setattr(usage, "refill_runs", lambda issues, now: 1)
 

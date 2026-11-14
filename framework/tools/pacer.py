@@ -407,7 +407,8 @@ class Briefs:
                                start_sweep=None if dry else sweep)
         except Exception as e:                          # the runs find the stuck tickets themselves (`cycle_start.py`)
             print(f"no takeovers: {e}", file=sys.stderr)
-        self.feedback = 1 if unanswered() else 0       # one main run reads the owner comments (#294)
+        # one main run reads the owner comments (#294) and takes the new issues with no label (`usage.owner_wait`)
+        self.feedback = 1 if unanswered() or usage.owner_wait() else 0
 
     def take(self, task, account=None):
         """(number, name, text, next) of the next free ticket of `task`, claimed for its run (of `account`), or None. A

@@ -609,6 +609,7 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
     weights, source = health.lane_weights(comments)
     eq = claims if lanes is None else health.opus_equivalent(claims, lanes, weights)   # in Opus runs (#1727)
     target = target_runs(usage, now, burn, burn7=burn7, owner=owner_wait) if target is None else target
+    owner_run = bool(target) and target_runs(usage, now, burn, burn7=burn7) == 0   # the week gives no run: the target is for the owner
     free = free_sources if ROADMAP_REFILL else (lambda: [])   # `refill_roadmap = false`: the roadmap starts no run
     reviews = functools.cache(lambda: due_reviews(starved=lambda: ROADMAP_REFILL and target is not None
                                                   and ready < target and not free_sources()))
@@ -640,11 +641,18 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
         out["flow"], out["flow_reason"] = cap, flow
     if cap is not None:                                     # the flow is the bottleneck: Opus runs repair the PRs
         k, runs = min(k, cap), dict.fromkeys(runs, 0)
+    if owner_run:
+        # The runs above the weekly pace are for the owner: Opus runs with no lane, also when no ticket is ready. Such a
+        # run reads the comments and the new issues of the owner (`start.md`, steps 3 and 4). A lane run with a
+        # ticket of its lane got the one run of the target, and the answers of the owner waited (2026-11-14).
+        room = max(0, math.floor(target - eq + 1e-9))
+        k, runs = (0 if paused else min(room, MAX_FIRE if cap is None else cap)), dict.fromkeys(runs, 0)
     if DEVICE in dashboard.RESERVED and DEVICE not in weights:   # the worker run: in K and in the plan, with no weight
         k, runs = k + device, {**runs, DEVICE: device}
     line = (f"{describe(usage, now, burn, burn7, owner=owner_wait)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
             + (f"pending {json.dumps(wait)} · " if wait else "")
             + (f"device {device} (ready {ready_device}) · " if ready_device else "")
+            + ("owner first · " if owner_run else "")
             + f"refill {refill} ({need or f'ready {ready}, target {target}: no refill source or a refill lock < {REFILL_GAP} min'}) · "
             f"paused {paused} · {flow} · max_fire {MAX_FIRE} · weights "
             + ", ".join(f"{n} {w:.2f} ({source[n]})" for n, w in weights.items()) + note)
