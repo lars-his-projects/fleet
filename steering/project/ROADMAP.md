@@ -62,7 +62,7 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - Done on 2026-11-13 (the PRs aoe2mc 6450, travel-aggregator 2864 and tumach-dance 863): `repo` in `agent.toml`,
     the image names, the Pages addresses, the links in the documents
   - The server pulls the new image names (2026-11-13)
-  - The owner checks the scheduled tasks and one `.env` value: card 2 of this repository
+  - The owner gave each scheduled task its repository in the organization and changed one `.env` value (cards 2 and 4, done on 2026-11-13)
 - [ ] `system:source` The agent system (`framework/`) lives in the hub
   - Each project pins a version; a sync workflow brings a fix from the hub to each project
   - The three copies of the system principles are replaced by `standards/`
