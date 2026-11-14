@@ -9,9 +9,10 @@ LABEL org.opencontainers.image.description="The fleet worker: a GitHub Actions r
 USER root
 
 # The tools of a job. Xvfb gives a display to a browser that is not headless (`xvfb-run`).
+# libatomic1: the Node.js binary below needs it (the first build failed with no libatomic.so.1).
 RUN apt-get update -y \
     && apt-get install -y --no-install-recommends git curl jq unzip ca-certificates \
-       python3 python3-pip python3-venv xvfb xauth \
+       python3 python3-pip python3-venv xvfb xauth libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Node.js LTS from the official Node image: no install script from the internet.
