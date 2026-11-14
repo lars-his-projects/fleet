@@ -84,15 +84,16 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - A workflow makes the repository from the template, adds it to `fleet.toml`, and sets the labels, the rules and Pages
   - A run writes the roadmap; the owner gets one card: approve or change the roadmap
   - The skill `/new-project` fills the same form with a dialogue
-  - No scheduled task and no secret for each project (card 6). The test of 2026-11-13: a run with no repository
-    cannot attach one, so shared tasks with no repository do not work. A session can start a run directly in a
-    repository (the repository, the model and the prompt), with no task, no token and no secret
-  - Decision of the owner (card 6, "A2", 2026-11-13): one starter, a cheap session with no repository, reads the plans
-    of the pacer workflows one time per hour and starts the runs; a fixed limit of starts per hour is in its script
-  - The rollout: first the hub and each new project; the three older projects follow after the proof below
-  - The test of 2026-11-13: the platform refuses a run that a session with no person starts. The owner gave the
-    permission on 2026-11-14 (card 6, "P"): a settings file in the repository `fleet-starter` allows it for the starter only
-  - Not proved yet: a run that the starter started does a ticket and merges a PR
+  - Done on 2026-11-14 for a new project: no scheduled task and no secret. The starter session starts the runs that
+    the pacer workflow planned (`docs/STARTER.md`, the repository `fleet-starter`, cards 6 and 8). The first project
+    made this way is street-quiz (card 7): the owner gave one card answer and one click
+  - Open: the owner still makes the empty repository with one click; a workflow with a token that the owner
+    approves for each use can do it
+  - Open: a run that the starter started does a ticket and merges a PR; then the four older projects move from
+    their scheduled tasks to the starter
+  - Open: the form "New project" starts the steps by itself; on 2026-11-14 a session did them from a card
+  - Open: the share of the week of each project comes from `fleet.toml`; on 2026-11-14 it is a fixed value in each
+    project, so a new project makes the sum larger than 1
 - [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
 - [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
 - [ ] `human:budget` The attention budget: minutes on each card; the inbox sorts by value for each minute

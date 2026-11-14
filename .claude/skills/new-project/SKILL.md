@@ -147,6 +147,9 @@ selects "Use it".
      `{ haiku = 0.25 }`, or `{ haiku = 0.25, deep = 4.0 }` with `reserved = ["haiku", "deep"]`. Each lane is a
      scheduled task and two secrets more for the owner.
    - `.claude/skills/new-project/`: delete it, unless the owner wants to make more projects from the new one.
+   - `.claude/settings.json`: when the starter session of the hub starts the runs (`starts = "session"`, the
+     default of the template), add `"effortLevel": "low"`: the starter cannot select the effort of a run
+     (`docs/STARTER.md` of the hub).
    - `.claude/settings.json`: add `allow` rules for the commands of the stack (for example `Bash(npm:*)`,
      `Bash(cargo:*)`). Remove nothing from `deny`.
    - The list "Write these specific files" that the bootstrap printed names the specific files of the source project.
