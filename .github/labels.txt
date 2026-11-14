@@ -31,6 +31,7 @@ hold|fbca04|On a PR: the Automerge workflow does not merge it
 automerge|0e8a16|On a PR: the Automerge workflow merges it when CI is green, on any branch
 conflict|b60205|On a PR: the Automerge workflow could not merge it
 #rename lane:deep|lane:fable
+lane:device|d4c5f9|A ticket that needs a device; only the worker runs it, no cloud run takes it (ticket skill, "Model lanes")
 lane:fable|5319e7|A hard ticket for a Fable run (ticket skill, "Model lanes")
 lane:haiku|c2e0c6|A clear, templated ticket for a Haiku run (ticket skill, "Model lanes")
 lane:sonnet|bfd4f2|A clear ticket with little to decide, for a Sonnet run (ticket skill, "Model lanes")
