@@ -13,7 +13,12 @@ A blocked step stays your work until each resource failed. Go down this list, an
    copy that is in the repository. Put the route that works into the code or the setup (a list of servers in the
    script, `scripts/cloud-setup.sh`), so that the next run does not search again.
 2. **Another machine.** A job of GitHub Actions has a network of its own. When a host gives no answer from a cloud
-   session, a workflow can run the command and commit the result or make a PR.
+   session, a workflow can run the command and commit the result or make a PR. Start a workflow that has
+   `workflow_dispatch` yourself: the GitHub tool `actions_run_trigger` (method `run_workflow`, ref `main`). Then
+   read its result (`actions_list`, `get_job_logs`, or the branch that the job writes to). A workflow of your PR
+   starts only after its merge: start it one time then, and write the result on the ticket before you stop. A job
+   on the worker of the hub starts in the same way. A run that stops with "a person must start the workflow" in
+   its last message gave the step to no person: nobody reads the session (hub #17, 2026-11-14).
 3. **A device or a program that a cloud session does not have** (a phone, a second browser, the installed app,
    the real program). Do not give the check to the owner (owner, 2026-11-14). An emulator or the real program on
    the worker of the hub does it: for a phone, the Android emulator of the Android SDK. Suggest the tool
