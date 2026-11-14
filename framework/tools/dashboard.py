@@ -474,7 +474,7 @@ def render(old_body, issues, comments, open_prs, closed_issues, closed_prs, now,
 
 # ---- GitHub REST ----------------------------------------------------------------------------
 def api(path, method="GET", data=None, repo=None):
-    """One REST call of the repository (`repo`: another one, for example the hub of the fleet)."""
+    """One REST call of the repository (`repo`: another one, for example the hub with the worker)."""
     token, repo = os.environ.get("GITHUB_TOKEN"), repo or REPO
     if not token:                                  # cloud sessions: gh has the credentials
         cmd = ["gh", "api", f"repos/{repo}/{path}", "-X", method]
