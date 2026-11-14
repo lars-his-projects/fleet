@@ -20,9 +20,10 @@ jobs:
           python3 --version
           node --version
           claude --version
-      - name: The options of the Claude Code CLI
-        # A run reads the permission modes here before it changes worker-run.yml: the image updates the CLI.
-        run: claude --help
+      - name: The permission options of the Claude Code CLI
+        # A run reads the modes here before it changes worker-run.yml: the image updates the CLI.
+        # Only these lines: the full help text is 300 lines in the context of the run that reads the log.
+        run: claude --help | grep -E -A 8 -- '--permission-(mode|prompts) '
       - name: Load a page in Chromium
         # --no-sandbox: the container drops all capabilities, so the sandbox of Chromium cannot start.
         run: |

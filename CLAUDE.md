@@ -32,6 +32,7 @@ Put scratch output in the scratchpad, in `out/` or in `_site/`. Never commit a b
 - `standards/` – the rules of all projects: `PRINCIPLES.md` (S1 to S10), `HUMAN.md`, `DESIGN.md`, `RESOURCES.md`, `FEEDBACK.md`.
 - `steering/project/` – the roadmap, the decisions and the principles of the hub.
 - `.github/workflows/` – `ci.yml` (the job `quick`), `fleet-page.yml` (builds and publishes the page), `labels.yml`.
+  `worker-run.yml` runs one agent run of a project on the worker (`deploy/worker/README.md`, "A worker run").
   `.github/ISSUE_TEMPLATE/new-project.yml` is the form "New project". `.github/labels.txt` defines the labels.
 - `tests/` – pytest. The data of a test is made up in the test.
 - `framework/`, `.claude/`, `agent.toml`, `steering/system/`, `scripts/`, `docs/` – the agent system of this

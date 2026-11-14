@@ -60,6 +60,84 @@ You keep the keys. The token stays in `.env` on polopc. No agent gets a shell on
    - Remove: `docker compose down --volumes --rmi all`, then `rm -rf ~/fleet-worker`. Revoke the token on
      <https://github.com/settings/personal-access-tokens>.
 
+## A worker run
+
+The workflow `worker-run` (`.github/workflows/worker-run.yml`) runs one agent run of a project on polopc. It checks
+out the project, installs its packages in a virtual environment, and runs the Claude Code CLI with the prompt:
+
+```bash
+claude -p "$PROMPT" --permission-mode auto --permission-prompts none --output-format json
+```
+
+- **The guard is the guard of a cloud run.** The mode `auto` checks each tool call. The CLI reads
+  `.claude/settings.json` of the project, so its deny list and its hooks apply. `--permission-prompts none` denies
+  each call that needs an answer of a person: the run never waits. The workflow has no mode and no flag that
+  skips the permission checks, and a test refuses one (`tests/test_fleet_worker_run.py`).
+- **A denied call stops nothing in secret.** The job summary shows the last message of the run and each denied
+  tool call. The run does not go around a denial: it reports it on the ticket (`autopilot` skill, `owner.md`).
+- **The secrets.** The job has `CLAUDE_CODE_OAUTH_TOKEN` (a secret of the organization) and the token of the job
+  (`GITHUB_TOKEN`). It has no other secret. The tools of the agent system use `GITHUB_TOKEN` for the GitHub API.
+- **The permission modes change with the CLI.** The image updates the CLI each week. The workflow stops when
+  `claude --help` does not name the mode `auto` and the option `--permission-prompts`. The workflow `worker-check`
+  prints these options: read them before you change the command.
+
+### How a project calls it
+
+A project has a small workflow of its own that calls the workflow of the hub as a reusable workflow:
+
+```yaml
+name: worker-run
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: The prompt of the run
+        required: true
+        default: /scheduled max lane device
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+jobs:
+  run:
+    uses: lars-his-projects/fleet/.github/workflows/worker-run.yml@main
+    with:
+      prompt: ${{ inputs.prompt }}
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+```
+
+Why a reusable workflow and not a dispatch of the hub workflow with an input `repo`: the token of a job is the
+token of the repository that starts the workflow. A job of the hub cannot push a branch or open a PR in a project
+with its token: it would need a personal token of the owner as one more secret. With the call, the job runs with
+the token of the project, the hub keeps the one source of the steps, and the project keeps the right to start a
+run. The hub starts the same workflow for itself with `workflow_dispatch`.
+
+- The caller has only `workflow_dispatch`. The job of the hub workflow does not start for another event of the
+  caller, so a pull request of a fork gets no job on polopc through this workflow.
+- The caller gives the one secret by name. Never write `secrets: inherit`.
+- Start a run: the tab "Actions" of the project, the workflow `worker-run`, "Run workflow". An agent with write
+  access starts it with the GitHub tool `actions_run_trigger`.
+
+### How a PR of a worker run gets its CI
+
+GitHub starts no workflow for an event that the token of a job made. So a push and a PR of a worker run start no
+`pull_request` workflow, and the PR would wait with no check. One event is an exception: a `workflow_dispatch`
+with the token of a job does start a workflow.
+
+1. `ci.yml` of the project has the trigger `workflow_dispatch`.
+2. The run ships with `framework/tools/ship_pr.py`. In a job of GitHub Actions, the tool starts `ci.yml` on the
+   branch of the PR after each push (`actions/workflows/ci.yml/dispatches`, `ref` = the branch). The job has the
+   permission `actions: write` for this.
+3. The check `quick` of that CI run is on the head commit of the PR. `ship_pr.py` waits for it as in a cloud run.
+4. The sweep of Automerge merges the PR: it reads the checks of the head commit of each open agent PR, and a green
+   `quick` check is enough. The CI run of a job token gives Automerge no `workflow_run` event, so the merge comes
+   with the next sweep (the schedule of Automerge, or the pacer), not at once.
+
+Limits of the token of a job: it cannot push a change of a file in `.github/workflows/`. A ticket that changes
+a workflow is no ticket for the worker.
+
 ## What the worker can and cannot reach
 
 - It cannot read your files: it has no host folder. It has two Docker volumes: `profiles` for the browser
