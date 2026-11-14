@@ -36,4 +36,5 @@ jobs:
           context: deploy/worker
           pull: true
           push: true
-          tags: ghcr.io/lars-his-projects/fleet-worker:latest
+          # The name of this repository with "-worker": the image that deploy/worker/docker-compose.yml names.
+          tags: ghcr.io/${{ github.repository }}-worker:latest

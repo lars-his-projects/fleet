@@ -20,7 +20,9 @@ the owners sees the change, and it costs no money. A migration that drops data i
 ## What an agent never asks
 
 - A check that a machine can do, also when the machine needs a real device: give the ticket a device label, and a
-  worker with that device does it (roadmap `workers:devices`).
+  worker with that device does it (roadmap `workers:devices`). An emulator counts as the device: the Android
+  emulator for a phone. The agent suggests the tool itself and uses it on the worker (`deploy/worker/`). It asks
+  the owner only with a proposal card, when the tool costs money or needs a key (owner, 2026-11-14).
 - A time, a value or a text that a test can check.
 - An opinion on a look that the design system covers.
 - A step that a script can do.
