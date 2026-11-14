@@ -25,10 +25,37 @@ the owners sees the change, and it costs no money. A migration that drops data i
 - An opinion on a look that the design system covers.
 - A step that a script can do.
 
+## The owner is the last resource
+
+The owner, 2026-11-14: "It should automatically use the available resources to fix it, and not ask me first."
+On that day a run asked the owner to run a script on his computer, because a rule that an agent wrote gave the step
+to the owner, and because one server gave no answer. A second server gave the answer.
+
+A blocked step stays the work of the agent until each resource failed, in this sequence:
+
+1. Another route on the same machine: another server or mirror of the same data, another API, a package, a stored
+   copy. The route that works goes into the code or the setup.
+2. Another machine: a job of GitHub Actions has a network of its own (`RESOURCES.md`).
+3. A rule of the project stops the step: the agent does not go around the rule. It asks for the rule, not for the
+   step: a decision card that names the rule and its source, with a recommendation.
+4. Only then a step card, for what only the owner has or decides: an account, a secret, money, a device, a right.
+
+A denial is not a resource that failed: a guard or a person decided it (the auto mode, a network policy). The agent
+does not go around it.
+
+The check (S5): the workflow `cards.yml` with `framework/tools/card.py` reads each card when the label `needs-human`
+comes. A step card must say why no machine can do the step (`Only the owner:`) and what the run tried (`Tried:`). The
+workflow gives a complete card to its owner as the assignee. It takes the label off an incomplete card and says
+which lines it needs: the owner does not get that card.
+
+A limit on what an agent can do needs a source: the words of the owner, a law, or the usage policy of a service. An
+agent does not write a limit of its own into the rules of a project (`new-project` skill).
+
 ## The cards
 
 A question for a person is a card: an issue with the label `needs-human`, one label of its kind, and the person as
 its assignee (the GitHub field "Assignees"). Each card has a line `Minutes: N`: the time that the person needs.
+The text of a card is the section `## For the owner` of the issue or of a comment (`ticket` skill of a project).
 GitHub then shows each person all cards of all projects in one list (https://github.com/issues/assigned, also in the
 phone app) and sends a notification. (Until 2026-11-13 a label `for-<name>` named the person.)
 
@@ -36,8 +63,8 @@ phone app) and sends a notification. (Until 2026-11-13 a label `for-<name>` name
   The recommendation and its principle. The default that applies when nobody answers, if the decision is easy to undo.
   One card for one request: the decisions of one request come as one table with one answer. (On 2026-11-13 one
   request, travel-aggregator #2818, made six decision tickets.)
-- **Step card** (`step`). Why only a person can do it. One command or one direct link for each step, with the values
-  prepared. The check that tells the agent that the step is done: the agent closes the card when the check passes.
+- **Step card** (`step`). Why only a person can do it (`Only the owner:`), and each resource that the agent used
+  first (`Tried:`). One command or one direct link for each step, with the values prepared. The check that tells the agent that the step is done: the agent closes the card when the check passes.
 - **Proposal card** (`proposal`). A new direction, a resource, an integration or a tool. The evidence, the cost,
   what changes, and the prepared steps.
 
