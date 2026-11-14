@@ -212,14 +212,27 @@ def waiting(issues, repo, now):
     return sorted(rows, key=lambda r: (KINDS.index(r["kind"]), -(r["number"] or 0)))
 
 
-def working(issues, repo, now):
-    """The runs at work of one project: its open `in-progress` issues, sorted by number, with the minutes since the last change."""
+def claim_lane(subject):
+    """The lane of a claim commit subject: `... lane NAME`. No lane and `main` give `opus`."""
+    match = re.search(r" lane (\w+)$", subject or "")
+    return match.group(1) if match and match.group(1) != "main" else "opus"
+
+
+def working(issues, repo, now, claims=None):
+    """The runs at work of one project: its open `in-progress` issues, sorted by number.
+
+    `minutes`: since the last change. `lane` and `claim_minutes`: from `claims` ({number: {"subject", "date"}}); None when no claim is known.
+    """
+    claims = claims or {}
     rows = []
     for issue in issues:
         updated = issue.get("updated_at")
+        claim = claims.get(issue.get("number"))
         rows.append({"number": issue.get("number"), "title": issue.get("title") or "",
                      "url": issue.get("html_url") or f"https://github.com/{repo}/issues/{issue.get('number')}",
-                     "minutes": max(0, round((now - ts(updated)).total_seconds() / 60)) if updated else None})
+                     "minutes": max(0, round((now - ts(updated)).total_seconds() / 60)) if updated else None,
+                     "lane": claim_lane(claim["subject"]) if claim else None,
+                     "claim_minutes": max(0, round((now - ts(claim["date"])).total_seconds() / 60)) if claim and claim.get("date") else None})
     return sorted(rows, key=lambda r: r["number"] or 0)
 
 
@@ -300,7 +313,7 @@ def build(fleet, loaded, now):
             "share": round(p.weight / total_weight, 4), "owners": list(p.owners), "links": dict(p.links),
             "goals": goals, "done": sum(g["done"] for g in goals or []), "total": sum(g["total"] for g in goals or []),
             "waiting": None if issues is None else waiting(issues, p.repo, now),
-            "working": None if at_work is None else working(at_work, p.repo, now),
+            "working": None if at_work is None else working(at_work, p.repo, now, d.get("claims")),
             "pacer": pacer_state(d.get("pacer") or [], weeks, now),
             "last_report": runs["last_report"], "reports_24h": runs["reports_24h"], "prs_7d": runs["prs_7d"],
             "usd_7d": round(runs["usd_7d"], 2), "errors": list(d.get("errors") or [])})
