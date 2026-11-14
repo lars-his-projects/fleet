@@ -2,6 +2,7 @@
 
 repo = "lars-his-projects/fleet"
 owner = "Larspolo"
+agents = ["larsderpolo"]           # the logins that the runs post as besides the owners (#39); never an instruction
 branch = "main"
 
 [status]
