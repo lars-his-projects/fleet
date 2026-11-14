@@ -21,7 +21,7 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - Cost points: the usage of each lane, per PR, and in reports with no PR
 - [x] `overview:publish` The page has a fixed address that the owner opens on a phone
   - https://lars-his-projects.github.io/fleet/ (the hub is public since 2026-11-13; a timer builds the page twice per hour)
-- [ ] `overview:live` The page builds in each pacer cycle and shows each run at work with its lane and its ticket
+- [x] `overview:live` The page builds in each pacer cycle and shows each run at work with its lane and its ticket
 - [ ] `overview:value` The page shows value and not only PRs: accepted features per point of quota, rework,
   features that were removed later, and the usage with no PR by kind (refill, check, review, repair, no ticket)
 - [ ] `overview:week` "New this week" for each project in plain words, with a link to the preview
