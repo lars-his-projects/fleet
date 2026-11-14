@@ -54,6 +54,7 @@ IMAGE = 1600                 # tokens of an image in a tool result (an estimate)
 # 2026-10. A second row is the price of a prompt above LONG tokens.
 PRICES = {
     "claude-fable-5-1": ((10.0, 50.0, 0.25),),
+    "claude-fable-5-2": ((8.0, 40.0, 0.20),),     # 2026-11-14, platform.claude.com/docs/en/about-claude/pricing
     "claude-haiku-5-5": ((0.10, 0.50, 0.01), (0.50, 2.50, 0.05)),
     "claude-opus-5": ((5.0, 25.0, 0.50),),
     "claude-opus-5-5": ((4.0, 20.0, 0.20),),
