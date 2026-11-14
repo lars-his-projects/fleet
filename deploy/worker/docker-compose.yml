@@ -1,0 +1,42 @@
+# The fleet worker on polopc. Start it with `docker compose up -d` in the folder with this file and .env.
+# The worker container gets no host folder, no Docker socket and no extra privilege.
+# Watchtower updates only the containers of this stack (scope fleet-worker).
+services:
+  worker:
+    image: ghcr.io/lars-his-projects/fleet-worker:latest
+    env_file: .env
+    # An ephemeral runner stops after each job. Docker then starts it again.
+    restart: always
+    # No `init: true`: the start script must be process 1, so that the access token goes out of the
+    # environment of process 1 before a job starts. run.sh of the runner forwards the stop signals.
+    shm_size: 2gb
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    mem_limit: 16g
+    cpus: 8
+    pids_limit: 4096
+    volumes:
+      - profiles:/home/runner/profiles
+      # Heavy tools that a job installs one time, for example the Android SDK and the image of a phone.
+      - tools:/home/runner/tools
+    labels:
+      - com.centurylinklabs.watchtower.scope=fleet-worker
+
+  # Pulls a new image every 5 minutes and starts the worker again with it.
+  watchtower:
+    image: nickfedor/watchtower:latest
+    restart: always
+    environment:
+      WATCHTOWER_SCOPE: fleet-worker
+      WATCHTOWER_POLL_INTERVAL: "300"
+      WATCHTOWER_CLEANUP: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - com.centurylinklabs.watchtower.scope=fleet-worker
+
+volumes:
+  profiles:
+  tools:
