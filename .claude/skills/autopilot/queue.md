@@ -28,6 +28,11 @@ runs do the tickets where a wrong answer costs the most (`ticket` skill, "Model 
 claims and the report then name the lane). Pick from its section `Candidates`. Stop when no `lane:fable` ticket is
 ready, or at 120k context (`more.md`): the other runs take the other tickets for less.
 
+The lane `device` is no model (hub #13): its tickets need a device, and only a worker run takes them (the prompt
+`/scheduled max lane device`). The pacer starts at most one, with a dispatch of the worker workflow, while a
+`lane:device` ticket is ready and the heartbeat of the worker is fresh (`usage.device_runs`, `pacer.start_worker`).
+A worker run follows the rules of a lane run: `cycle_start.py --lane device`, then only tickets of its lane.
+
 The duty lane does the epic check and the queue refill of step 5, the roadmap review and the process review. It is
 `duty` in `[pacing]` of `steering/system/system.toml`. With `duty = "opus"`, the runs of the default lane (no lane in
 the argument) do this work, and the runs of a lane with a label skip it. While `reserved` names the duty lane, only

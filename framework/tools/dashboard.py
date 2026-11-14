@@ -473,16 +473,17 @@ def render(old_body, issues, comments, open_prs, closed_issues, closed_prs, now,
 
 
 # ---- GitHub REST ----------------------------------------------------------------------------
-def api(path, method="GET", data=None):
-    token = os.environ.get("GITHUB_TOKEN")
+def api(path, method="GET", data=None, repo=None):
+    """One REST call of the repository (`repo`: another one, for example the hub of the fleet)."""
+    token, repo = os.environ.get("GITHUB_TOKEN"), repo or REPO
     if not token:                                  # cloud sessions: gh has the credentials
-        cmd = ["gh", "api", f"repos/{REPO}/{path}", "-X", method]
+        cmd = ["gh", "api", f"repos/{repo}/{path}", "-X", method]
         if data is not None:
             cmd += ["--input", "-"]
         r = subprocess.run(cmd, input=json.dumps(data) if data is not None else None, capture_output=True,
                            text=True, check=True)
         return json.loads(r.stdout or "null")
-    req = urllib.request.Request(f"https://api.github.com/repos/{REPO}/{path}", method=method,
+    req = urllib.request.Request(f"https://api.github.com/repos/{repo}/{path}", method=method,
                                  data=json.dumps(data).encode() if data is not None else None,
                                  headers={"Authorization": f"Bearer {token}",
                                           "Accept": "application/vnd.github+json",
