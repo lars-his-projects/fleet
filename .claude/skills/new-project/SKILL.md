@@ -118,11 +118,16 @@ selects "Use it".
 
 1. `python3 framework/tools/bootstrap.py DIR --repo OWNER/NAME`, with DIR a new directory in the scratchpad.
 2. Fill each start file in DIR (each `TODO` line). Do not leave a `TODO`:
-   - `steering/project/ROADMAP.md`: the roadmap of step 5.
+   - `steering/project/ROADMAP.md`: the roadmap of step 5. With a user interface, its first goal also has two
+     features. One: a browser test that opens the built page; it fails on a console error or on an answer with a
+     status of 400 or more, and it checks the main part of the page (for a map: the map drew). Two: the design
+     system with its proposal card for the owner (tokens, a style page, three themes to select from; the design
+     standard of the hub). The owner expects the design question in the first days (2026-11-14).
    - `agent.toml`: the commands of step 3 in `[commands]`. Keep the other values.
    - `CLAUDE.md`: the idea in two sentences, the commands table, the planned code map (the directories of the stack).
    - `.claude/skills/verify/SKILL.md`: level 1 lint and fast tests, then the levels of the stack (slow tests, a run of
-     the program, a screenshot for a user interface).
+     the program, a screenshot for a user interface). A look at a page uses the real page with its real services
+     and reads the console errors: an empty main part is a fault, not a limit of the network.
    - `.github/workflows/ci.yml`: the setup step of the language next to `setup-python`. Keep the job name `quick`.
    - `scripts/cloud-setup.sh`: the tools of the stack by name (it runs before the clone and cannot read a file of the
      repository; the SessionStart hook runs the `install` command of `agent.toml`), in `SETUP_NEEDS` too. `scripts/allowed-domains.txt`: the
@@ -134,6 +139,11 @@ selects "Use it".
    - `steering/project/PRINCIPLES.md`: the answers of step 4. One principle per philosophy answer (`## P1. <rule>`,
      2 or 3 lines: what wins, and one example of this project). The section "Owner involvement": the areas of
      "Your decisions". The section "Try a feature": the way of "Try a feature", with what the agents make for it.
+     A limit on what an agent can do ("no agent does X", "the owner does X") needs a source: the words of the
+     owner in step 4, a law, or the usage policy of a service. Name the source in the rule. Do not write a limit
+     of your own: a rule with no source gave the owner of street-quiz a script to run (2026-11-14). For an outside
+     service, keep two cases apart: the tests and CI use stored data and send no request, and an agent gets data
+     or looks at a page on purpose, with few requests.
    - `CLAUDE.md`: the rule of P1 in one line in a section "Rules of the domain" (each run reads `CLAUDE.md`).
    - `[owner_tasks]` in `agent.toml`: with a test ticket, `play` = the words that each test ticket body has
      (for example "Try it on your computer").
