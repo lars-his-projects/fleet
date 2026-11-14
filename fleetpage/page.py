@@ -248,12 +248,13 @@ def working(m):
             continue
         for t in p["working"]:
             rows.append(f'<tr><td>{key(i)}{E(p["name"])}</td><td><a href="{E(t["url"])}">#{t["number"]}</a> {E(t["title"])}</td>'
+                        f'<td>{E(t["lane"] or "–")}</td><td class="n">{E(ago(t["claim_minutes"]) if t["lane"] else "–")}</td>'
                         f'<td class="n">{E(ago(t["minutes"]))}</td></tr>')
     note = f'<p class="sub">Not read: {E(", ".join(failed))}.</p>' if failed else ""
     if not rows:
         return note + "<p>No run is at work.</p>"
     return (note + '<div class="tw"><table class="wide"><thead><tr><th>Project</th><th>Ticket</th>'
-            '<th class="n">Last change</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+            '<th>Lane</th><th class="n">Since claim</th><th class="n">Last change</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
 
 
 def inbox(m):

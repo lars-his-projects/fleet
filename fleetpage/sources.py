@@ -5,6 +5,7 @@ Each function returns plain data, or raises `SourceError` with one clear line.
 """
 import json
 import pathlib
+import re
 import subprocess
 import urllib.error
 import urllib.parse
@@ -93,3 +94,29 @@ def fetch_working(repo, token=None):
     return [{"number": i.get("number"), "title": i.get("title"), "html_url": i.get("html_url"),
              "updated_at": i.get("updated_at"), "labels": [label.get("name", "") for label in i.get("labels") or []]}
             for i in batch if "pull_request" not in i]
+
+
+def fetch_claims(repo, numbers, token=None):
+    """{ticket number: {"subject", "date"}}: the newest claim commit of each ticket in `numbers`.
+
+    The refs are `claim/N` and `claim/N-k`. A newest commit with a subject that starts with `Release` is no claim.
+    """
+    wanted = {int(n) for n in numbers}
+    if not wanted:
+        return {}
+    refs = json.loads(get(f"/repos/{repo}/git/matching-refs/heads/claim/", token))
+    groups = {}
+    for ref in refs:
+        match = re.fullmatch(r"refs/heads/claim/(\d+)(?:-\d+)?", ref.get("ref", ""))
+        if match and int(match.group(1)) in wanted:
+            groups.setdefault(int(match.group(1)), []).append((ref.get("object") or {}).get("sha"))
+    claims = {}
+    for number, shas in groups.items():
+        found = []
+        for sha in shas:
+            commit = json.loads(get(f"/repos/{repo}/git/commits/{sha}", token))
+            found.append(((commit.get("committer") or {}).get("date") or "", (commit.get("message") or "").split("\n")[0]))
+        date, subject = max(found)
+        if not subject.startswith("Release"):
+            claims[number] = {"subject": subject, "date": date}
+    return claims
