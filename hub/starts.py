@@ -11,7 +11,8 @@ The guards:
 - The plan comes from the pacer workflow of the project (a script that reads the quota), not from a model.
 - Only a project of `fleet.toml` with a weight above 0 whose newest record says `"starts": "session"` gets a start:
   the starter never starts a run in a project that starts its runs itself.
-- A plan older than `STALE` starts nothing: a pacer loop that died starts no run.
+- A plan older than `STALE` starts nothing: a pacer loop that died starts no run, and the plan that the tick
+  before used starts no run a second time (`TICK`: the starter gets a tick each 10 minutes).
 - `LIMIT_PROJECT` and `LIMIT_TICK` are fixed limits for one tick, also for a wrong record.
 - Only the lanes of `LANES` are known. The model of a lane is not in this repository: the starter session has it.
 """
@@ -30,7 +31,10 @@ LANES = ("fable", "sonnet", "haiku", "opus")   # the lanes that the starter know
 DEFAULT = "opus"                    # the lane of the runs that a plan gives no lane: the tickets with no lane label
 LIMIT_PROJECT = 4                   # the most starts for one project in one tick
 LIMIT_TICK = 8                      # the most starts in one tick
-STALE = 20 * 60                     # seconds: an older plan starts no run (the pacer writes one each 10 minutes)
+TICK = 10 * 60                      # seconds between two ticks of the starter (its timers: minute 02, 12, ... 52)
+STALE = TICK - 45                   # seconds: an older plan starts no run. The tick before used it, so each plan
+#                                     starts its runs one time, as `plan.py` of the starter does. The pacer plans at
+#                                     each full 10 minutes (pacer.yml), so a tick reads a plan of 2 to 4 minutes
 SESSION = "session"                 # the value of `starts` in a record of a project that the starter serves
 
 

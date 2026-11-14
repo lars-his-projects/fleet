@@ -20,11 +20,12 @@ the owner can make.
 
 ## How a run starts
 
-1. The pacer workflow of a project (`pacer.yml`, `framework/tools/pacer.py`) reads the quota each 10 minutes and plans
-   the runs: `k` runs, with the lane runs in `plan`. It writes the plan to the branch `metrics` of the project.
+1. The pacer workflow of a project (`pacer.yml`, `framework/tools/pacer.py`) reads the quota each 10 minutes, at the
+   minutes 00, 10, 20, 30, 40 and 50, and plans the runs: `k` runs, with the lane runs in `plan`. It writes the plan
+   to the branch `metrics` of the project.
 2. With `starts = "session"` in `[pacing]` of `steering/system/system.toml`, the workflow sends no call. Its record
    says `"starts": "session"`.
-3. On a tick the starter session runs `python3 plan.py` of its own repository. The script reads the registry of the
+3. On a tick (minute 02, 12, ...) the starter session runs `python3 plan.py` of its own repository. The script reads the registry of the
    hub (`fleet.toml`) and the newest pacer record of each project, as data. It prints the list of runs to start.
 4. The starter starts one run for each item: a new session in the repository of the project, with the fixed start
    text of the lane: `/scheduled max` for the default lane `opus`, and `/scheduled max lane NAME` for the lanes
@@ -65,10 +66,9 @@ The tests of 2026-11-13 showed both. So the owner gave the starter a permission 
 - With the permission, the platform does not let the starter select the effort of a run, and a line `effortLevel`
   in the settings of a project did not change it: the owner saw the effort medium in each run of street-quiz
   (2026-11-14). So the lanes differ by their model only.
-- A run starts in the 10 minutes after its plan, or not from that plan. A plan that is older than 9 minutes and
-  15 seconds at a tick starts nothing: the pacer plans again in its next cycle. The cycle of the pacer is some seconds
-  longer than 10 minutes, so its plans can come near that limit for some ticks in sequence, and the starts wait then.
-  A timer can be about one minute late.
+- A run starts 2 to 4 minutes after its plan. The pacer of a project starts each cycle at a full 10 minutes of the
+  clock (`pacer.yml`), and the ticks come 2 minutes later; a timer can be about one minute late. A plan that is older
+  than 9 minutes and 15 seconds at a tick starts nothing: the pacer plans again in its next cycle.
 - A run shows in the session list of the owner, not in the list of scheduled tasks. The starter archives a finished
   run after 2 hours. A run sends no phone notification.
 - The starter reads the branch `metrics` with no login: it serves only public repositories.
