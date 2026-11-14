@@ -57,9 +57,9 @@ Put scratch output in the scratchpad, in `out/` or in `_site/`. Never commit a b
 - **The runs follow the `autopilot` skill.** The tickets are the GitHub issues of this repository.
 - **The device tickets come first (owner, 2026-11-14):** the weekly pace does not limit the runs of the hub until the
   device tickets of the projects run on the worker (#13). Until then, a refill makes no new epic from the roadmap: the
-  runs do #13, its sub-issues and the tickets that are open, and the week pays for nothing more. The PR that sets
-  `workers:devices` to `[x]` in the roadmap also sets `week_guard = true` in `steering/system/system.toml` and removes
-  this line.
+  runs do #13, its sub-issues and the tickets that are open, and the week pays for nothing more (`refill_roadmap =
+  false`: the pacer starts no run for the roadmap). The PR that sets `workers:devices` to `[x]` in the roadmap also sets
+  `week_guard = true` in `steering/system/system.toml`, removes `refill_roadmap` there and removes this line.
 
 @framework/CLAUDE.md
 @docs/LEARNINGS.md

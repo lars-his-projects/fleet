@@ -102,6 +102,8 @@ as the Claude Code CLI reports them) and computes the number of runs: fast to 90
 its reset, then slower to 98 % at the reset (your decision, 2026-10-26), and not the week faster than it passes
 when `week_guard` in `agent.toml` is `true` (now `true` again after the release v0.1.0, your decision, 2026-11-01). Since 2026-11-13 `week_free` is 0: the weekly
 pace counts from the start of the week, so that the quota lasts to the weekly reset (your decision).
+Your answers go first (2026-11-14): while a comment of you has no answer, or a new issue has no label, one run starts
+also when the week is ahead (`owner_first` in `[pacing]`). That run answers and then does one ticket.
 You do not need to send percentages.
 A run of the scheduled task cannot start other runs (#566). So the workflow `pacer.yml` (#3193, #3194) runs
 `framework/tools/pacer.py` every 10 minutes: it computes the runs that the target misses (`usage.fire`, at most `max_fire` of

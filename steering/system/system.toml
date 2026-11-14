@@ -9,6 +9,10 @@ week_free = 0.0                 # below this 7-day usage the runs fill each 5-ho
 week_guard = false              # true: the 7-day usage limits the runs; false: only the 5-hour window counts. It is false until
                                 # the device tickets run on the worker (owner, 2026-11-14, "hub now"): the PR that sets
                                 # `workers:devices` to [x] in the roadmap sets it back to true (CLAUDE.md, "Rules")
+refill_roadmap = false          # false: the pacer starts no refill run for a roadmap feature with no epic. It is false while
+                                # `week_guard` is false: the same PR removes this line (9 empty runs in 90 minutes, 2026-11-14)
+owner_first = 1                 # the runs that start above the weekly pace while work of an owner waits: a comment with no
+                                # answer, or a new issue with no label (framework/tools/usage.py, `owner_wait`). 0: none
 week_share = 0.375              # the part of the weekly budget of the account that this project plans with (its weight in fleet.toml of the hub: 3 of 8)
 week_reserve = 0.10             # the part of the week that the runs leave to the sessions of the owner, until 12 hours before the weekly reset
 weights = { haiku = 0.25, sonnet = 0.5, fable = 2.5 }   # a lane run in Opus runs: Haiku is measured; Sonnet and Fable are start values from the list prices (2026-11-14)

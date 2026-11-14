@@ -57,6 +57,8 @@ QUEUE = CONFIG.get("pacing", {}).get("max_ci_queue", 5)      # flow brake: queue
 PR_MINUTES = CONFIG.get("pacing", {}).get("pr_minutes", 30)  # Automerge merges a green PR in a few minutes
 MAX_FIRE = CONFIG.get("pacing", {}).get("max_fire", 8)   # runs that the pacer starts per cycle: each run needs a few minutes to claim its ticket; the same as agent.toml (the pacer used an old 4, 2026-10-28)
 REFILL = CONFIG.get("pacing", {}).get("refill_runs", 1)   # runs beyond the ready tickets: each refills one epic (#609, #650)
+ROADMAP_REFILL = CONFIG.get("pacing", {}).get("refill_roadmap", True)   # false: no refill run for a roadmap feature with no epic
+OWNER_FIRST = CONFIG.get("pacing", {}).get("owner_first", 1)   # runs above the weekly pace while work of an owner waits (`owner_wait`); 0: none
 PENDING = 12                # minutes: a run that the pacer started and that has no claim yet counts as a claim
 REFILL_GAP = CONFIG.get("pacing", {}).get("refill_gap", 60)   # minutes after a refill lock with no refill run
 DEVICE = "device"           # the lane of the tickets that need a device: only a worker run takes them (hub #13)
@@ -85,8 +87,25 @@ def read_usage(timeout=120, token=None):
     return parse(r.stdout.splitlines())
 
 
+@functools.cache
+def owner_wait():
+    """1 when work of an owner waits that only a run can take: an owner comment with no answer (`feedback.fetch`), or an
+    open issue with no label (a new ticket that no run triaged). Else 0, also after a read error. The weekly pace does
+    not hold that run back (`target_runs`, `owner`): the owner answered 8 tickets of a paced project, and no run used
+    the answers for 4 hours (travel-aggregator, 2026-11-14). The run answers, then does one ticket (`scheduled`, step 3)."""
+    try:
+        import dashboard
+        import feedback
+        if feedback.fetch():
+            return 1
+        return int(any("pull_request" not in i and not i.get("labels") for i in dashboard.pages("issues?state=open")))
+    except Exception as e:                                  # a GitHub error: the weekly pace decides alone
+        print(f"no read of the work of the owner: {e}", file=sys.stderr)
+        return 0
+
+
 def target_runs(usage, now, burn=BURN, end=END, lo=LO, hi=HI, mid=MID, mid_left=MID_LEFT, burn7=None, free7=FREE7,
-                week=WEEK_GUARD, share7=SHARE7, reserve7=RESERVE7):
+                week=WEEK_GUARD, share7=SHARE7, reserve7=RESERVE7, owner=0):
     """The number of runs that uses `mid` of the 5-hour window `mid_left` hours before its reset, and `end` at the
     reset, with a guard for the 7-day window. burn7 (the share of the 7-day quota of one run-hour, measured): a week
     used ahead of the time gets at most the runs that its budget (1 - used) carries to the 7-day reset (#1695). This
@@ -97,7 +116,10 @@ def target_runs(usage, now, burn=BURN, end=END, lo=LO, hi=HI, mid=MID, mid_left=
     The projects of one account share its week: each pacer reads the same 7-day usage, so each one plans with its
     part `share7` of the budget (`week_share`; 1: the project has the account alone). The runs leave `reserve7` of
     the week (`week_reserve`) to the sessions of the owner: the pace and the budget count to 1 - `reserve7`. In the
-    last `RELEASE7` hours they count to 1 again, so that the week ends near 100 %."""
+    last `RELEASE7` hours they count to 1 again, so that the week ends near 100 %.
+    owner: the runs that the work of an owner needs (a number, or a function that is called only when the weekly budget
+    gives no run: `owner_wait`). At most `OWNER_FIRST` of them start above the weekly pace, never above a limit that
+    the service rejects."""
     if not usage or "five_hour" not in usage:
         return None
     used, reset, status = usage["five_hour"]
@@ -120,8 +142,8 @@ def target_runs(usage, now, burn=BURN, end=END, lo=LO, hi=HI, mid=MID, mid_left=
         cap = 1.0 if hours7 <= RELEASE7 else 1.0 - reserve7     # the reserve of the owner is free again at the end
         elapsed = cap * (1 - max(reset7 - now, 0) / (7 * 86400))
         if burn7 and used7 > elapsed:
-            fit = share7 * max(cap - used7, 0) / hours7 / burn7
-            return min(max(lo, min(hi, n)), math.floor(fit))
+            fit = min(max(lo, min(hi, n)), math.floor(share7 * max(cap - used7, 0) / hours7 / burn7))
+            return fit or min(owner() if callable(owner) else owner, OWNER_FIRST)   # the owner goes first (owner_wait)
         if used7 > elapsed + 0.10:
             n //= 2
     return max(lo, min(hi, n))
@@ -546,13 +568,13 @@ def roadmap_release(root=None, epics=None):
     return 100 * done / len(features) if features else None
 
 
-def describe(usage, now, burn=BURN, burn7=None):
+def describe(usage, now, burn=BURN, burn7=None, owner=0):
     out = []
     for k, (used, reset, status) in sorted(usage.items()):
         at = datetime.datetime.fromtimestamp(reset, datetime.timezone.utc)
         out.append(f"{k} {used:.0%} (resets {at:%a %H:%M} UTC, {(reset - now) / 3600:.1f} h, {status})")
     week = week_line(usage, now) + (f" · burn7 {burn7:.4f}" if burn7 else "")
-    return " · ".join(out + [week] * bool(week)) + f" · burn {burn:.3f} · max {HI} runs · target {target_runs(usage, now, burn, burn7=burn7)} runs"
+    return " · ".join(out + [week] * bool(week)) + f" · burn {burn:.3f} · max {HI} runs · target {target_runs(usage, now, burn, burn7=burn7, owner=owner)} runs"
 
 
 def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, out=None, target=None, account=None):
@@ -581,10 +603,11 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
         out.update(open=open_all, refs=refs, claims=claims, lanes=lanes)
     weights, source = health.lane_weights(comments)
     eq = claims if lanes is None else health.opus_equivalent(claims, lanes, weights)   # in Opus runs (#1727)
-    target = target_runs(usage, now, burn, burn7=burn7) if target is None else target
-    reviews = functools.cache(lambda: due_reviews(starved=lambda: target is not None and ready < target
-                                                  and not free_sources()))
-    need = refill_need(ready, target, open_all, release_due, free=free_sources, reviews=reviews,
+    target = target_runs(usage, now, burn, burn7=burn7, owner=owner_wait) if target is None else target
+    free = free_sources if ROADMAP_REFILL else (lambda: [])   # `refill_roadmap = false`: the roadmap starts no run
+    reviews = functools.cache(lambda: due_reviews(starved=lambda: ROADMAP_REFILL and target is not None
+                                                  and ready < target and not free_sources()))
+    need = refill_need(ready, target, open_all, release_due, free=free, reviews=reviews,
                        now=now.timestamp() if hasattr(now, "timestamp") else now, closing=autoclosing,   # reviews after checks
                        orphans=lambda: dashboard.orphans(open_all))
     only_review = False
@@ -614,7 +637,7 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
         k, runs = min(k, cap), dict.fromkeys(runs, 0)
     if DEVICE in dashboard.RESERVED and DEVICE not in weights:   # the worker run: in K and in the plan, with no weight
         k, runs = k + device, {**runs, DEVICE: device}
-    line = (f"{describe(usage, now, burn, burn7)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
+    line = (f"{describe(usage, now, burn, burn7, owner=owner_wait)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
             + (f"pending {json.dumps(wait)} · " if wait else "")
             + (f"device {device} (ready {ready_device}) · " if ready_device else "")
             + f"refill {refill} ({need or f'ready {ready}, target {target}: no refill source or a refill lock < {REFILL_GAP} min'}) · "
@@ -655,11 +678,11 @@ def main(argv=None):
             print(f"{n} {r}")
         print(line, file=sys.stderr)
     elif a.target:
-        print(target_runs(usage, now, burn, burn7=burn7))
+        print(target_runs(usage, now, burn, burn7=burn7, owner=owner_wait))
     elif a.json:
-        print(json.dumps({"usage": usage, "burn": burn, "burn7": burn7, "target": target_runs(usage, now, burn, burn7=burn7)}))
+        print(json.dumps({"usage": usage, "burn": burn, "burn7": burn7, "target": target_runs(usage, now, burn, burn7=burn7, owner=owner_wait)}))
     else:
-        print(describe(usage, now, burn, burn7))
+        print(describe(usage, now, burn, burn7, owner=owner_wait))
 
 
 if __name__ == "__main__":
