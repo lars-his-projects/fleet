@@ -240,6 +240,22 @@ def now_table(m, now):
             "can take. Waiting: tickets that wait for a person. No work: the pacer cycles of this quota week with no ready ticket and no claim.</p>")
 
 
+def working(m):
+    rows, failed = [], []
+    for i, p in enumerate(m["projects"]):
+        if p.get("working") is None:
+            failed.append(p["name"])
+            continue
+        for t in p["working"]:
+            rows.append(f'<tr><td>{key(i)}{E(p["name"])}</td><td><a href="{E(t["url"])}">#{t["number"]}</a> {E(t["title"])}</td>'
+                        f'<td class="n">{E(ago(t["minutes"]))}</td></tr>')
+    note = f'<p class="sub">Not read: {E(", ".join(failed))}.</p>' if failed else ""
+    if not rows:
+        return note + "<p>No run is at work.</p>"
+    return (note + '<div class="tw"><table class="wide"><thead><tr><th>Project</th><th>Ticket</th>'
+            '<th class="n">Last change</th></tr></thead><tbody>' + "".join(rows) + "</tbody></table></div>")
+
+
 def inbox(m):
     rows, failed = [], []
     for i, p in enumerate(m["projects"]):
@@ -444,7 +460,8 @@ def render(m):
   {tiles(m)}
   {alerts(m)}
 </header>
-<section id="now"><div class="sec"><h2>Now</h2></div>{now_table(m, now)}</section>
+<section id="now"><div class="sec"><h2>Now</h2></div>{now_table(m, now)}
+  <h3>Runs at work</h3>{working(m)}</section>
 <section id="inbox"><div class="sec"><h2>Inbox</h2></div>
   <p class="lead">Each open ticket with the label <code>needs-human</code>. The attention budget is {budget} minutes per week. The tickets do not have a price in minutes yet.</p>
   {inbox(m)}</section>

@@ -85,3 +85,11 @@ def fetch_waiting(repo, token=None, pages=5):
         if len(batch) < 100:
             break
     return issues
+
+
+def fetch_working(repo, token=None):
+    """The open issues of `repo` with the label `in-progress` (no pull requests), one page of 100."""
+    batch = json.loads(get(f"/repos/{repo}/issues?state=open&labels=in-progress&per_page=100", token))
+    return [{"number": i.get("number"), "title": i.get("title"), "html_url": i.get("html_url"),
+             "updated_at": i.get("updated_at"), "labels": [label.get("name", "") for label in i.get("labels") or []]}
+            for i in batch if "pull_request" not in i]

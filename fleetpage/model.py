@@ -211,6 +211,17 @@ def waiting(issues, repo, now):
     return sorted(rows, key=lambda r: (KINDS.index(r["kind"]), -(r["number"] or 0)))
 
 
+def working(issues, repo, now):
+    """The runs at work of one project: its open `in-progress` issues, sorted by number, with the minutes since the last change."""
+    rows = []
+    for issue in issues:
+        updated = issue.get("updated_at")
+        rows.append({"number": issue.get("number"), "title": issue.get("title") or "",
+                     "url": issue.get("html_url") or f"https://github.com/{repo}/issues/{issue.get('number')}",
+                     "minutes": max(0, round((now - ts(updated)).total_seconds() / 60)) if updated else None})
+    return sorted(rows, key=lambda r: r["number"] or 0)
+
+
 def fleet_budget(fleet, quota, projects, weeks, now):
     """The advice of the one budget for this cycle (`hub/budget.py`), or None with no quota record.
 
@@ -260,11 +271,13 @@ def build(fleet, loaded, now):
             firsts.append(runs["first_report"])
         goals = parse_roadmap(d.get("roadmap")) if d.get("roadmap") is not None else None
         issues = d.get("waiting")
+        at_work = d.get("working")
         projects.append({
             "name": p.name, "repo": p.repo, "what": p.what, "stage": p.stage, "weight": p.weight,
             "share": round(p.weight / total_weight, 4), "owners": list(p.owners), "links": dict(p.links),
             "goals": goals, "done": sum(g["done"] for g in goals or []), "total": sum(g["total"] for g in goals or []),
             "waiting": None if issues is None else waiting(issues, p.repo, now),
+            "working": None if at_work is None else working(at_work, p.repo, now),
             "pacer": pacer_state(d.get("pacer") or [], weeks, now),
             "last_report": runs["last_report"], "reports_24h": runs["reports_24h"], "prs_7d": runs["prs_7d"],
             "usd_7d": round(runs["usd_7d"], 2), "errors": list(d.get("errors") or [])})
