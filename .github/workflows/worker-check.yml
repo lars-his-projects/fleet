@@ -17,6 +17,7 @@ jobs:
       - name: Versions
         run: |
           git --version
+          gh --version
           python3 --version
           node --version
           claude --version
