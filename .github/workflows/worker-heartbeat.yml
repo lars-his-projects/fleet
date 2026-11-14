@@ -1,0 +1,59 @@
+name: worker-heartbeat
+
+# The worker on polopc writes the time of its last job to the branch `metrics` (file `worker/polopc.json`).
+# A token of a repository cannot list the runners of the organization, so the worker writes its own state (#17).
+# When the worker is offline, a scheduled job waits in the queue. The group below keeps at most one waiting job.
+# Never add a pull request trigger: a workflow of a fork must not run on polopc (tests/test_fleet_worker_kit.py).
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write    # push the branch metrics
+
+concurrency:
+  group: worker-heartbeat
+  cancel-in-progress: false
+
+jobs:
+  heartbeat:
+    runs-on: [self-hosted, polopc]
+    timeout-minutes: 10
+    steps:
+      - name: Write the heartbeat to the branch metrics
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}.git
+        run: |
+          set -eu
+          dir="$(mktemp -d)"
+          cd "$dir"
+          git init -q .
+          git config user.name "fleet-worker"
+          git config user.email "fleet-worker@users.noreply.github.com"
+          auth="$(printf 'x-access-token:%s' "$GITHUB_TOKEN" | base64 -w0)"
+          git config http.extraheader "AUTHORIZATION: basic $auth"
+          git remote add origin "$REPO_URL"
+          kvm=false
+          if [ -r /dev/kvm ] && [ -w /dev/kvm ]; then kvm=true; fi
+          for attempt in 1 2 3 4 5; do
+            if git fetch -q origin metrics; then
+              git checkout -q -B metrics FETCH_HEAD
+            else
+              git checkout -q --orphan metrics
+              git rm -rfq . 2>/dev/null || true
+            fi
+            mkdir -p worker
+            printf '{"worker": "polopc", "time": "%s", "kvm": %s}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$kvm" > worker/polopc.json
+            git add worker/polopc.json
+            git commit -q -m "worker: heartbeat of polopc"
+            if git push -q origin HEAD:refs/heads/metrics; then
+              echo "pushed worker/polopc.json (kvm $kvm)"
+              exit 0
+            fi
+            echo "push failed (attempt $attempt): take the branch again"
+            sleep $((attempt * 3))
+          done
+          echo "no push went through" >&2
+          exit 1
