@@ -87,7 +87,6 @@ def read_usage(timeout=120, token=None):
     return parse(r.stdout.splitlines())
 
 
-@functools.cache
 def owner_wait():
     """1 when work of an owner waits that only a run can take: an owner comment with no answer (`feedback.fetch`), or an
     open issue with no label (a new ticket that no run triaged). Else 0, also after a read error. The weekly pace does
@@ -608,7 +607,8 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
         out.update(open=open_all, refs=refs, claims=claims, lanes=lanes)
     weights, source = health.lane_weights(comments)
     eq = claims if lanes is None else health.opus_equivalent(claims, lanes, weights)   # in Opus runs (#1727)
-    target = target_runs(usage, now, burn, burn7=burn7, owner=owner_wait) if target is None else target
+    owner = functools.cache(owner_wait)                     # one read of GitHub for this plan
+    target = target_runs(usage, now, burn, burn7=burn7, owner=owner) if target is None else target
     owner_run = bool(target) and target_runs(usage, now, burn, burn7=burn7) == 0   # the week gives no run: the target is for the owner
     free = free_sources if ROADMAP_REFILL else (lambda: [])   # `refill_roadmap = false`: the roadmap starts no run
     reviews = functools.cache(lambda: due_reviews(starved=lambda: ROADMAP_REFILL and target is not None
@@ -649,7 +649,7 @@ def fire(usage, now, burn=BURN, burn7=None, skip=(), status=None, started=None, 
         k, runs = (0 if paused else min(room, MAX_FIRE if cap is None else cap)), dict.fromkeys(runs, 0)
     if DEVICE in dashboard.RESERVED and DEVICE not in weights:   # the worker run: in K and in the plan, with no weight
         k, runs = k + device, {**runs, DEVICE: device}
-    line = (f"{describe(usage, now, burn, burn7, owner=owner_wait)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
+    line = (f"{describe(usage, now, burn, burn7, owner=owner)} · claims {claims} ({eq:.2f} Opus runs) · ready {ready} · "
             + (f"pending {json.dumps(wait)} · " if wait else "")
             + (f"device {device} (ready {ready_device}) · " if ready_device else "")
             + ("owner first · " if owner_run else "")

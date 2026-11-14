@@ -344,14 +344,9 @@ def brief(issue, comments, name, task, sample, limit=TEXT_MAX, context=CONTEXT, 
 
 
 def unanswered():
-    """True when owner comments wait for an answer (`feedback.py`); then one main run gets no brief and does step 3.
-    False when GitHub fails: the briefs go on."""
-    try:
-        import feedback
-        return bool(feedback.fetch())
-    except Exception as e:
-        print(f"no feedback read: {e}", file=sys.stderr)
-        return False
+    """True when owner comments wait for an answer (`feedback.py`) or a new issue has no label (`usage.owner_wait`);
+    then one main run gets no brief and does steps 3 and 4. False when GitHub fails: the briefs go on."""
+    return bool(usage.owner_wait())                         # 0 after a read error
 
 
 def red_main():
@@ -407,8 +402,7 @@ class Briefs:
                                start_sweep=None if dry else sweep)
         except Exception as e:                          # the runs find the stuck tickets themselves (`cycle_start.py`)
             print(f"no takeovers: {e}", file=sys.stderr)
-        # one main run reads the owner comments (#294) and takes the new issues with no label (`usage.owner_wait`)
-        self.feedback = 1 if unanswered() or usage.owner_wait() else 0
+        self.feedback = 1 if unanswered() else 0       # one main run reads the owner comments (#294)
 
     def take(self, task, account=None):
         """(number, name, text, next) of the next free ticket of `task`, claimed for its run (of `account`), or None. A

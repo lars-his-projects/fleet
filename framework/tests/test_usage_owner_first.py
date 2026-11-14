@@ -43,12 +43,7 @@ def test_a_rejected_limit_stays_at_no_run(monkeypatch):
 
 
 def test_owner_wait_counts_a_comment_with_no_answer_and_an_issue_with_no_label(monkeypatch):
-    def wait():
-        usage.owner_wait.cache_clear()
-        try:
-            return usage.owner_wait()
-        finally:
-            usage.owner_wait.cache_clear()
+    wait = usage.owner_wait
     pull = {"number": 4, "labels": [], "pull_request": {}}
     monkeypatch.setattr(dashboard, "pages", lambda path: [{"number": 3, "labels": [{"name": "P2"}]}, pull])
     monkeypatch.setattr(feedback, "fetch", lambda: [{"id": 1}])
