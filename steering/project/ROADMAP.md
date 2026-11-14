@@ -90,8 +90,8 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - Decision of the owner (card 6, "A2", 2026-11-13): one starter, a cheap session with no repository, reads the plans
     of the pacer workflows one time per hour and starts the runs; a fixed limit of starts per hour is in its script
   - The rollout: first the hub and each new project; the three older projects follow after the proof below
-  - The test of 2026-11-13: the platform refuses a run that a session with no person starts. The owner must give
-    a permission for the starter (card 6). Until then a new project plans its runs and starts none
+  - The test of 2026-11-13: the platform refuses a run that a session with no person starts. The owner gave the
+    permission on 2026-11-14 (card 6, "P"): a settings file in the repository `fleet-starter` allows it for the starter only
   - Not proved yet: a run that the starter started does a ticket and merges a PR
 - [ ] `human:batch` One card for one request, and a weekly digest of the "decide and log" decisions with a veto
 - [ ] `human:one-tap` A thumbs-up of an owner login on a card means "take the recommendation"
