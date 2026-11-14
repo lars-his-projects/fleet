@@ -517,9 +517,14 @@ def measured_burn(comments=None, account=None):
         return None
 
 
-def burns(comments, burn=None, account=None):
+def burns(comments, burn=None, account=None, shared=None):
     """(burn, burn7): `burn` (--burn), else measured from the comments of read_status (the lines of `account` only, when
-    it is given), else BURN and BURN7."""
+    it is given), else BURN and BURN7. A project that shares its account with other projects (`shared`; None:
+    `week_share` is below 1) uses BURN and BURN7: its `Usage:` lines divide the usage of all projects and of the
+    sessions of the owner by its own runs. One project measured 0.814 and 0.1044, 27 and 21 times the real values,
+    and got no run (street-quiz, 2026-11-14). A measure of the account needs the one pacer of all projects."""
+    if SHARE7 < 1 if shared is None else shared:
+        return burn or BURN, BURN7
     return burn or measured_burn(comments, account) or BURN, measured_burn7(comments, account) or BURN7
 
 
