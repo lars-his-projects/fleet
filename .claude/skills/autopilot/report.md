@@ -35,7 +35,7 @@ phases read 8 · claim 1 · code 18 · verify 9 · ci 0 · conflict 5 · report 
 
 Result (`report.py` stops any other form): `pr #n` when you pushed PR #n and Automerge merges it later (the usual case: you report before the merge);
 `closed` when you finished the ticket with no PR (a check ticket with the label `close`, 2026-10-29: 80 of 345 tickets
-said `none`, most of them such checks); `checked` when a check ticket (or a deep-lane split or epic check) ran
+said `none`, most of them such checks); `checked` when a check ticket (or a split or an epic check of the duty lane) ran
 and put its findings on the ticket (a comment, new bug tickets, `Depends on`) and the ticket stays open by design (#5782:
 8 of 18 given-back runs were such checks); `none` only when the run stopped without a PR and the ticket stays open.
 Before you give back a ticket whose next step only the owner can do, add `needs-human` (`owner.md`): with `none` and

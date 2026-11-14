@@ -56,12 +56,12 @@ name each missing item. When `steering/project/PRINCIPLES.md` has the section "T
 ticket #N (all other criteria met), end the check comment with the line `Close this epic when #N merges.`: when #N
 closes as completed by a merged PR or by the label `close` of a run (a check ticket with no PR, #6065), `close.yml` adds the evidence comment and the label `close`
 (`framework/tools/epic_autoclose.py`), and the pacer starts no epic check for it. A later run comment on the epic keeps the line when it is about #N and names no other issue than the close comment (the result of a play check, #6288, `close_comment`); a comment of a person or about a new ticket needs the line again at its end (#6289). When an open criterion waits only for
-an open ticket of another epic, add a line "Part of #E" to the body of that ticket: else the pacer starts a deep run
-for the epic check of E in each cycle (`usage.refill_need`). When the epic waits only for an owner answer on another issue (a question that is already there), add `needs-human` to the epic and a comment that names that issue: `usage.epic_checks` then skips it (#6367: two deep runs in 5 minutes found the same state). Else lock the epic first: `python3 framework/tools/claim.py E --refill`
+an open ticket of another epic, add a line "Part of #E" to the body of that ticket: else the pacer starts a run of the duty lane
+for the epic check of E in each cycle (`usage.refill_need`). When the epic waits only for an owner answer on another issue (a question that is already there), add `needs-human` to the epic and a comment that names that issue: `usage.epic_checks` then skips it (#6367: two runs of the duty lane in 5 minutes found the same state). Else lock the epic first: `python3 framework/tools/claim.py E --refill`
 (E = the epic; exit 1: another run makes its sub-issue, skip the epic, #505). Then make one sub-issue (same priority)
 for the criteria that an agent can do. A criterion that needs the owner stays on the epic. Then pick again (#176, #155 waited while P3 tickets ran).
-Release checks: when `cycle_start.py` prints the section "Release checks (no ticket, make them in the refill)", a deep
-run makes a check ticket for each listed check (`roadmap` skill, "Release checks"), also when the open epics have work
+Release checks: when `cycle_start.py` prints the section "Release checks (no ticket, make them in the refill)", a run of the duty
+lane makes a check ticket for each listed check (`roadmap` skill, "Release checks"), also when the open epics have work
 left, and writes its number in the `ticket` column of `steering/project/RELEASE.md` (a PR). Lock it first:
 `python3 framework/tools/claim.py 0 --refill` (exit 1: another run makes them, #3342).
 Refill the queue when fewer candidates are ready than the target number of runs, so that parallel runs always find
@@ -75,7 +75,7 @@ than the ready tickets for this (`agent.toml`): many runs close tickets faster t
 2026-10-28: 3 ready tickets for 40 target runs). It starts them only while an open ticket is less than 60 minutes old
 (`usage.refill_runs`), else 1: an empty refill run costs quota. It starts none when R >= N and no epic or release check
 waits (`usage.refill_need`, #3547), and none when R < N and the refill has no source: no such check, no roadmap
-feature with no epic and no fallback (#3560). A due process or roadmap review starts one too (deep locks).
+feature with no epic and no fallback (#3560). A due process or roadmap review starts one too (the locks of the duty lane).
 It starts none while a refill lock is younger than `refill_gap` minutes (`agent.toml`, `usage.refill_recent`), unless R < N / 2
 or a review is due: a review has its own lock (owner, 2026-10-29).
 Give each new ticket its lane (`ticket` skill, "Model lanes").

@@ -64,8 +64,10 @@ plan, and how the owner can try a feature (step 4):
    service. Add "None of these".
 3. "Budget" for services: "Free only (Recommended)", "Up to 10 USD a month", "More". With "Free only", a service with
    a cost always gets a decision ticket.
-4. "Runs" (the Claude plan): "One main task (Recommended)": one scheduled task, 3 secrets. "Main and a haiku lane":
-   small tickets on a cheap model, one task more. "Main, haiku and deep lanes": for a big plan, two tasks more.
+4. No question about the runs: the starter session of the hub starts them (`starts = "session"` in the template),
+   each lane with its model, and the owner has no step for them. Ask "Runs" only for a project that the starter
+   cannot serve (a private repository): "One main task (Recommended)": one scheduled task, 3 secrets. "Main and a
+   haiku lane": small tickets on a cheap model, one task more.
 
 ## 4. Ask the direction
 

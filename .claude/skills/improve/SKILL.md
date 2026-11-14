@@ -146,7 +146,7 @@ lever was above its threshold. The gap of merged PRs moves (`claim.next_gap`, th
 `agent.toml`, owner 2026-10-29): `change` halves a gap up to `gap` (down to `min_gap`) and resets a larger one to `gap`;
 `none` doubles a gap from `gap` up (up to `max_gap`) and resets a smaller one to `gap`. Owner work since the last review makes it `owner_gap`. So reviews that find
 work come more often, and reviews that find nothing come less often. Say `change` when the review opened a PR or a
-ticket for a miss or for a lever above its threshold; else `none`. A small gap costs one deep run per gap: the
+ticket for a miss or for a lever above its threshold; else `none`. A small gap costs one run of the duty lane per gap: the
 thresholds of step 3 are the brake.
 
 ## Guardrails

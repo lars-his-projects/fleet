@@ -16,7 +16,7 @@ The rare cases are in files next to this one (#1700). Read a file only when its 
 | `start.md` | Steps 1 to 5: at the start of a run with no brief of the pacer, and before each later ticket. |
 | `github.md` | You need a `gh api` path (issues, labels, PRs, CI, sweep) or the list of labels. |
 | `overlap.md` | A ticket, branch or PR of another run is in your way: a stale claim, a stalled PR, a takeover. |
-| `queue.md` | Step 4 or 5: a `size:L` ticket, the epic check, the queue refill, the haiku and deep lanes. |
+| `queue.md` | Step 4 or 5: a `size:L` ticket, the epic check, the queue refill, the lanes. |
 | `conflict.md` | A PR has a merge conflict (label `conflict`, or `mergeable_state` is `dirty`). |
 | `owner.md` | You must ask the owner, the auto mode denies an action, a ticket is wrong, or step 7 needs a check ticket. |
 | `process.md` | Step 6.5 (the questions of step 9) and after step 8 (the review slot). |
