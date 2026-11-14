@@ -47,7 +47,9 @@ report of step 8, and the `Usage:` line (of the brief, else of the first `cycle_
 ## 6. Do the ticket
 
 1. Branch: use the branch that the session instructions name. Else `git fetch origin main` and
-   `git checkout -b agent/<number>-<short-slug> origin/main`.
+   `git checkout -b "agent/<number>-<short-slug>-$(python3 -c 'import secrets; print(secrets.token_hex(3))')" origin/main`.
+   The random part is necessary: the branch is the name of the run in `claim.py`, and two runs made the same
+   `agent/25-device-tickets` (#36).
 2. Beat (`python3 framework/tools/claim.py N --beat`) at least every 20 minutes until you open the PR.
    Read the ticket and its comments (the claim prints them, #3459) first: the owner's comments win. Then `python3 framework/tools/ticket_context.py N` once: the code places of the body (#3829). A brief of the pacer has both: skip the two reads. Read only the code that the ticket needs (code map: `CLAUDE.md`). Use Grep.
 3. For a bug, write a failing test first. Then change the code. Keep the diff small and in the existing style.
