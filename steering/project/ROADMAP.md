@@ -75,6 +75,7 @@ The sequence of the work is the sequence of the phases: 1 the pacer and the sync
   - A lint refuses a card with no minutes, no default, or no reason why a machine cannot do it
   - Done on 2026-11-14 in each project: the workflow `cards.yml` checks a card when the label comes (the kind, the
     minutes, and for a step card the reason and the tries), assigns a complete card and sends an incomplete card back
+  - Done on 2026-11-14: a comment of the owner of a card takes the label and the assignee off (`cards.yml`)
   - Open: the default of a decision card, and the labels `decision`, `step` and `proposal` in each project
 - [ ] `workers:polopc` polopc is a worker: a user `agent`, containers, a worker service that asks for work
   - The environment of a project is a container file in git; an agent changes it by a PR

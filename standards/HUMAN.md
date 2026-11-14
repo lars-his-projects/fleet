@@ -71,7 +71,9 @@ phone app) and sends a notification. (Until 2026-11-13 a label `for-<name>` name
 ## The answer
 
 A comment of an owner login on the card is the answer. A short answer is enough: "A", "yes", "A, but keep X".
-The agent records the answer in the `DECISIONS.md` file of the project and removes `needs-human`.
+The workflow `cards.yml` then takes the label `needs-human` and the owner as the assignee off at once, so the card
+leaves the list of the owner with no other step (owner, 2026-11-14). The next run reads the answer, does what it says
+and records it in the `DECISIONS.md` file of the project.
 
 Planned (roadmap `human:one-tap`): a thumbs-up of an owner login on a card means "take the recommendation".
 Until a tool reads the thumbs-up, answer with a comment.
