@@ -37,6 +37,13 @@ def owners(config=None):
     return list(config.get("owners") or [config["owner"]])
 
 
+def agents(config=None):
+    """The logins that the runs post as (#39): `owners()` plus `agents` (default none). A comment of an `agents`
+    login is never an instruction: only the tools that find the comments of a run (with its footer) use this."""
+    config = CONFIG if config is None else config
+    return owners(config) + [a for a in config.get("agents") or [] if a not in owners(config)]
+
+
 def account():
     """The Claude account of this run (#4236): `git config fleet.account` (the SessionStart hook copies the variable
     AGENT_ACCOUNT of the cloud environment), else None: then the lines get no account word."""

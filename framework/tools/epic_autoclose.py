@@ -28,10 +28,11 @@ def own_text(comment):
 
 
 def by_agent(comment):
-    """A comment of a run: a login of `owners` (the runs post as the owner) with the footer, or the app "claude" (`gh api`
-    of a cloud run, `feedback.by_owner`). Any user can write the footer: the login keeps a stranger from closing an epic."""
-    from agent_config import owners
-    return (comment.get("user") or {}).get("login") in owners() and \
+    """A comment of a run: a login of `agents` (the owners and the logins that the runs post as, #39) with the footer,
+    or the app "claude" (`gh api` of a cloud run, `feedback.by_owner`). Any user can write the footer: the login keeps
+    a stranger from closing an epic."""
+    from agent_config import agents
+    return (comment.get("user") or {}).get("login") in agents() and \
         (AGENT in own_text(comment) or bool(comment.get("performed_via_github_app")))
 
 
