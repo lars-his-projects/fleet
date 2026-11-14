@@ -15,6 +15,18 @@ RUN apt-get update -y \
        python3 python3-pip python3-venv xvfb xauth libatomic1 \
     && rm -rf /var/lib/apt/lists/*
 
+# The GitHub CLI from the official apt source of GitHub (a signed package, no install script). The skills use `gh api`.
+# The run gives it the token of the job as GH_TOKEN (worker-run.yml).
+RUN mkdir -p -m 755 /etc/apt/keyrings \
+    && curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+       > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update -y \
+    && apt-get install -y --no-install-recommends gh \
+    && rm -rf /var/lib/apt/lists/* \
+    && gh --version
+
 # Node.js LTS from the official Node image: no install script from the internet.
 COPY --from=node:lts-slim /usr/local/bin/node /usr/local/bin/node
 COPY --from=node:lts-slim /usr/local/lib/node_modules /usr/local/lib/node_modules
