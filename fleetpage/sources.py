@@ -53,6 +53,19 @@ def read_metrics(folder):
     return pacer, reports
 
 
+def read_workers(folder):
+    """The heartbeat records of the workers: each file `worker/*.json` of the `metrics` branch (a bad file is skipped)."""
+    records = []
+    for path in sorted((pathlib.Path(folder) / "worker").glob("*.json")):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8", errors="replace"))
+        except ValueError:
+            continue
+        if isinstance(record, dict):
+            records.append(record)
+    return records
+
+
 def get(path, token=None, accept="application/vnd.github+json", timeout=30):
     """The body (bytes) of `GET https://api.github.com/<path>`."""
     request = urllib.request.Request(API + path, headers={"Accept": accept, "User-Agent": "fleet-page",
