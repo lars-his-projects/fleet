@@ -20,6 +20,9 @@ jobs:
           python3 --version
           node --version
           claude --version
+      - name: The options of the Claude Code CLI
+        # A run reads the permission modes here before it changes worker-run.yml: the image updates the CLI.
+        run: claude --help
       - name: Load a page in Chromium
         # --no-sandbox: the container drops all capabilities, so the sandbox of Chromium cannot start.
         run: |
