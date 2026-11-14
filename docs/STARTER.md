@@ -6,8 +6,9 @@ the owner can make.
 
 ## Status on 2026-11-14: in use for each project but one
 
-- The starter is the repository `lars-his-projects/fleet-starter`, one session with only that repository, and the
-  scheduled task "fleet starter" that sends the session one tick each hour.
+- The starter is the repository `lars-his-projects/fleet-starter`, one session with only that repository, and six
+  scheduled tasks "fleet starter". Each task sends the session one tick each hour, at the minutes 02, 12, 22, 32, 42
+  and 52: the session gets a tick each 10 minutes (owner, 2026-11-14: "six ticks").
 - street-quiz was the first project that the starter served. Proved there on 2026-11-14: the starter started runs
   with no person, and those runs did tickets and merged five pull requests.
 - Since 2026-11-14 the starter also serves the hub, aoe2mc and tumach-dance (`starts = "session"`; for aoe2mc and
@@ -47,7 +48,8 @@ The tests of 2026-11-13 showed both. So the owner gave the starter a permission 
 - The plan comes from the pacer workflow, not from a model. The starter starts only what `plan.py` prints.
 - Only a repository of the organization that is in `fleet.toml`, and only when its newest record says
   `"starts": "session"`: the starter never starts a run in a project that starts its runs itself.
-- A plan older than 20 minutes starts nothing.
+- A plan starts its runs one time: a plan older than a tick less 45 seconds (9 minutes and 15 seconds) starts
+  nothing (`TICK` and `STALE` of `plan.py`).
 - At most 4 starts for one project and 8 starts in one tick. The tests of `fleet-starter` guard these limits.
 - The start text is fixed for each lane. No text of a project goes into a start.
 - A run stops at its start when the quota target is 0 (the `scheduled` skill).
@@ -56,21 +58,28 @@ The tests of 2026-11-13 showed both. So the owner gave the starter a permission 
 
 - The model of each lane. It is in the text of the tick, as the model was in each scheduled task before:
   `haiku = claude-haiku-5-5, sonnet = claude-sonnet-5-5, opus = claude-opus-5-5, fable = claude-fable-5-2`.
-- The starter session and its timer. A session of the owner made them with the session tools.
+- The starter session and its six timers. A session of the owner made them with the session tools.
 
 ## Known limits
 
 - With the permission, the platform does not let the starter select the effort of a run, and a line `effortLevel`
   in the settings of a project did not change it: the owner saw the effort medium in each run of street-quiz
   (2026-11-14). So the lanes differ by their model only.
-- A run can start up to one hour after its plan. With the scheduled tasks, the limit is 10 minutes.
+- A run starts in the 10 minutes after its plan, or not from that plan. A plan that is older than 9 minutes and
+  15 seconds at a tick starts nothing: the pacer plans again in its next cycle. The cycle of the pacer is some seconds
+  longer than 10 minutes, so its plans can come near that limit for some ticks in sequence, and the starts wait then.
+  A timer can be about one minute late.
 - A run shows in the session list of the owner, not in the list of scheduled tasks. The starter archives a finished
   run after 2 hours. A run sends no phone notification.
 - The starter reads the branch `metrics` with no login: it serves only public repositories.
 - A run can write to the branch `metrics` of its project. A wrong record can thus ask for runs of that project. The
   limits above hold, and each run checks the quota target at its start.
-- The starter session lives long, so each tick reads a longer history. A new starter session each week keeps a tick cheap.
-- Do not start the timer by hand: that makes a new session with no repository and no permission. The timer works at
+- The starter session keeps the copy of `fleet-starter` that it started with. After a change of `plan.py` or of the
+  tick steps, make a new starter session and its six timers, then delete the timers of the old session.
+- The starter session lives long. It needs no new session at a fixed time: the platform makes a summary of a long
+  history, and with a tick each 10 minutes the history stays in the cache. Make a new session only when a tick gets
+  slow or wrong.
+- Do not start a timer by hand: that makes a new session with no repository and no permission. A timer works at
   its scheduled times only.
 
 ## Add a project to the starter
@@ -85,5 +94,5 @@ The tests of 2026-11-13 showed both. So the owner gave the starter a permission 
 - Check: `python3 plan.py` in `fleet-starter` prints the list for this moment and the reason for each project with no
   start. `python3 -m hub.starts` in this repository gives the same list from the same rules.
 - Stop the starts of one project: remove the line `starts = "session"`, or add `paused` to its status issue.
-- Stop the starter: disable the scheduled task "fleet starter" at https://claude.ai/code/routines.
+- Stop the starter: disable the six scheduled tasks "fleet starter" at https://claude.ai/code/routines.
 - Remove the permission: remove the three session tools from the `allow` list of `fleet-starter`.

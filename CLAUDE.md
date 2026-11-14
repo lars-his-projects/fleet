@@ -54,6 +54,9 @@ Put scratch output in the scratchpad, in `out/` or in `_site/`. Never commit a b
   `steering/project/DECISIONS.md`. A rule that names a tool that does not exist says so and names its roadmap feature.
 - **A feature is done when it works on `main`.** Then set its line in the roadmap to `[x]` in the same PR.
 - **The runs follow the `autopilot` skill.** The tickets are the GitHub issues of this repository.
+- **The device tickets come first (owner, 2026-11-14):** the weekly pace does not limit the runs of the hub until the
+  device tickets of the projects run on the worker (#13). The PR that sets `workers:devices` to `[x]` in the roadmap
+  also sets `week_guard = true` in `steering/system/system.toml` and removes this line.
 
 @framework/CLAUDE.md
 @docs/LEARNINGS.md
